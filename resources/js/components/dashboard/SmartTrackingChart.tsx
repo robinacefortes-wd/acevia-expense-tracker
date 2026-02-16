@@ -1,0 +1,270 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  TooltipProps,
+} from 'recharts';
+import { TrendingUp, Calendar } from 'lucide-react';
+
+type Transaction = {
+  id?: string | number;
+  type: 'income' | 'expense';
+  amount: number | string;
+  date: string;
+  time?: string;
+};
+
+type TimePeriod = 'today' | '7days' | 'month' | 'year';
+
+interface ChartDataPoint {
+  date: string;
+  expense: number;
+  income: number;
+}
+
+interface SmartTrackingChartProps {
+  transactions: Transaction[];
+}
+
+const SmartTrackingChart: React.FC<SmartTrackingChartProps> = ({
+  transactions,
+}) => {
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>('7days');
+
+  const generateChartData = (): ChartDataPoint[] => {
+    if (!transactions.length) return [];
+
+    const now = new Date();
+    let startDate: Date;
+
+    switch (timePeriod) {
+      case 'today':
+        startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case 'month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+    }
+
+    const filtered = transactions.filter(t => {
+      const transDate = new Date(t.date);
+      return transDate >= startDate;
+    });
+
+    const grouped: Record<string, ChartDataPoint> = {};
+
+    filtered.forEach(t => {
+      const transDate = new Date(
+        t.date + (t.time ? `T${t.time}` : '')
+      );
+
+      let key: string;
+      if (timePeriod === 'today') {
+        key = transDate.toLocaleTimeString('en-PH', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      } else if (timePeriod === 'year') {
+        key = transDate.toLocaleDateString('en-PH', {
+          month: 'short',
+        });
+      } else {
+        key = transDate.toLocaleDateString('en-PH', {
+          month: 'short',
+          day: 'numeric',
+        });
+      }
+
+      if (!grouped[key]) {
+        grouped[key] = { date: key, expense: 0, income: 0 };
+      }
+
+      const amount = parseFloat(t.amount.toString());
+      if (t.type === 'expense') {
+        grouped[key].expense += amount;
+      } else {
+        grouped[key].income += amount;
+      }
+    });
+
+    return Object.values(grouped);
+  };
+
+  const data = generateChartData();
+  const isEmpty = data.length === 0;
+
+  const periodLabels: Record<TimePeriod, string> = {
+    today: 'Today',
+    '7days': 'Last 7 days',
+    month: 'This Month',
+    year: 'This Year',
+  };
+
+  const CustomTooltip = ({
+    active,
+    payload,
+  }: TooltipProps<number, string>) => {
+    if (active && payload && payload.length) {
+      const point = payload[0];
+      return (
+        <div
+          className="px-4 py-3 rounded-xl"
+          style={{
+            background: 'rgba(0, 0, 0, 0.9)',
+            border: '1px solid rgba(129, 81, 217, 0.3)',
+          }}
+        >
+          <p className="text-gray-300 text-sm mb-1">
+            {(point.payload as ChartDataPoint).date}
+          </p>
+          <p className="text-white font-semibold">
+            ₱
+            {point.value?.toLocaleString('en-PH', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <motion.div
+      data-testid="smart-tracking-chart"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.4 }}
+      className="rounded-2xl p-6 card-glass"
+      style={{ minHeight: '500px' }}
+    >
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+        <div>
+          <h3 className="text-xl font-semibold theme-text mb-1">
+            Smart Tracking
+          </h3>
+          <p className="theme-text-secondary text-sm">
+            Your spending patterns over time
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          {(Object.keys(periodLabels) as TimePeriod[]).map(period => (
+            <button
+              key={period}
+              onClick={() => setTimePeriod(period)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                timePeriod === period
+                  ? 'text-white'
+                  : 'theme-text-secondary hover:theme-text'
+              }`}
+              style={{
+                backgroundColor:
+                  timePeriod === period
+                    ? 'rgba(129, 81, 217, 0.2)'
+                    : 'transparent',
+                color: timePeriod === period ? '#8151d9' : undefined,
+              }}
+            >
+              {period === timePeriod && (
+                <Calendar className="w-4 h-4" />
+              )}
+              {periodLabels[period]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isEmpty ? (
+        <div
+          className="flex flex-col items-center justify-center"
+          style={{ height: '320px' }}
+        >
+          <div
+            className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(129,81,217,0.2), rgba(161,120,232,0.2))',
+            }}
+          >
+            <TrendingUp
+              className="w-12 h-12"
+              style={{ color: '#8151d9' }}
+            />
+          </div>
+          <h4 className="theme-text text-lg font-semibold mb-2">
+            No data yet
+          </h4>
+          <p className="theme-text-secondary text-sm text-center max-w-sm">
+            Start tracking your expenses by adding your first
+            transaction using the + button below.
+          </p>
+        </div>
+      ) : (
+        <ResponsiveContainer width="100%" height={320}>
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient
+                id="colorExpense"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset="5%"
+                  stopColor="#8151d9"
+                  stopOpacity={0.3}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="#8151d9"
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
+
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(255,255,255,0.05)"
+            />
+            <XAxis
+              dataKey="date"
+              stroke="#6b7280"
+              style={{ fontSize: '12px' }}
+            />
+            <YAxis
+              stroke="#6b7280"
+              style={{ fontSize: '12px' }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Area
+              type="monotone"
+              dataKey="expense"
+              stroke="#8151d9"
+              strokeWidth={3}
+              fillOpacity={1}
+              fill="url(#colorExpense)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      )}
+    </motion.div>
+  );
+};
+
+export default SmartTrackingChart;
