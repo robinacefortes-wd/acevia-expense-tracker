@@ -5,6 +5,10 @@ import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 import { initializeTheme } from './hooks/use-appearance';
 
+// 1. Import your new Context files
+import { ThemeProvider } from '@/components/dashboard/ThemeContext';
+import { StateProvider } from '@/context/StateContext';
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -19,7 +23,13 @@ createInertiaApp({
 
         root.render(
             <StrictMode>
-                <App {...props} />
+                {}
+                <ThemeProvider>
+                    <StateProvider>
+                        <App {...props} />
+                        {}
+                    </StateProvider>
+                </ThemeProvider>
             </StrictMode>,
         );
     },
@@ -28,5 +38,4 @@ createInertiaApp({
     },
 });
 
-// This will set light / dark mode on load...
 initializeTheme();

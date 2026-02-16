@@ -1,28 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  LayoutDashboard,
-  Receipt,
-  Target,
-  Settings,
-  Sun,
-  Moon,
-} from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-
-/* =======================
-   Types
-======================= */
+import { LayoutDashboard, Receipt, Target, Settings, Sun, Moon, LucideIcon } from 'lucide-react';
+import { useTheme } from '@/components/dashboard/ThemeContext';
 
 interface MenuItem {
-  icon: React.ElementType;
+  icon: LucideIcon;
   label: string;
   active: boolean;
 }
-
-/* =======================
-   Constants
-======================= */
 
 const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', active: true },
@@ -31,17 +16,9 @@ const menuItems: MenuItem[] = [
   { icon: Settings, label: 'Settings', active: false },
 ];
 
-/* =======================
-   Component
-======================= */
-
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-
-  const { theme, toggleTheme } = useTheme() as {
-    theme: 'light' | 'dark';
-    toggleTheme: () => void;
-  };
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <motion.aside
@@ -52,23 +29,25 @@ const Sidebar: React.FC = () => {
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
       className="relative flex-shrink-0 border-r theme-sidebar"
-      style={{
+      style={{ 
         position: 'fixed',
         height: '100vh',
-        zIndex: 40,
+        zIndex: 40
       }}
     >
       <div className="flex flex-col h-full py-6">
         {/* Logo */}
         <div className="px-4 mb-8">
-          <motion.div className="flex items-center gap-3" initial={false}>
-            <div
+          <motion.div 
+            className="flex items-center gap-3"
+            initial={false}
+          >
+            <div 
               className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: '#8151d9' }}
             >
               <span className="text-white font-bold text-xl">A</span>
             </div>
-
             {isExpanded && (
               <motion.span
                 initial={{ opacity: 0, width: 0 }}
@@ -88,20 +67,16 @@ const Sidebar: React.FC = () => {
           {menuItems.map((item, index) => (
             <motion.button
               key={index}
-              type="button"
               data-testid={`nav-${item.label.toLowerCase()}`}
               whileHover={{ x: 4 }}
               whileTap={{ scale: 0.98 }}
               className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl mb-2 transition-colors theme-nav-item"
               style={{
-                backgroundColor: item.active
-                  ? 'rgba(129, 81, 217, 0.15)'
-                  : 'transparent',
-                color: item.active ? '#8151d9' : undefined,
+                backgroundColor: item.active ? 'rgba(129, 81, 217, 0.15)' : 'transparent',
+                color: item.active ? '#8151d9' : undefined
               }}
             >
               <item.icon className="w-6 h-6 flex-shrink-0" />
-
               {isExpanded && (
                 <motion.span
                   initial={{ opacity: 0, width: 0 }}
@@ -120,7 +95,6 @@ const Sidebar: React.FC = () => {
         {/* Theme Toggle */}
         <div className="px-3 mt-auto">
           <motion.button
-            type="button"
             data-testid="theme-toggle"
             onClick={toggleTheme}
             whileHover={{ x: 4 }}
@@ -132,7 +106,6 @@ const Sidebar: React.FC = () => {
             ) : (
               <Moon className="w-6 h-6 flex-shrink-0" />
             )}
-
             {isExpanded && (
               <motion.span
                 initial={{ opacity: 0, width: 0 }}
