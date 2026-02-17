@@ -16,32 +16,38 @@ import '@/../css/dashboard.css';
 import { Transaction, Budget, SavingsData } from '@/types/index';
 
 interface DashboardProps {
+  // Data coming from DashboardController.php
   transactions: Transaction[];
-  savings: number;
+  savings: any[]; 
   budgets: Budget[];
-  onAddTransaction: (transaction: Transaction) => void;
-  onAddSavings: (savingsData: SavingsData) => void;
-  onEditSavings: (newAmount: number) => void;
-  onCreateBudget: (budgetData: Budget) => void;
-  onEditBudget: (budgetData: Budget) => void;
-  onDeleteBudget: (category: string) => void;
+  
+  // Original Props (Keeping these for compatibility)
+  onAddTransaction?: (transaction: Transaction) => void;
+  onAddSavings?: (savingsData: SavingsData) => void;
+  onEditSavings?: (newAmount: number) => void;
+  onCreateBudget?: (budgetData: Budget) => void;
+  onEditBudget?: (budgetData: Budget) => void;
+  onDeleteBudget?: (category: string) => void;
 }
 
-// 3. We use the props passed from Laravel web.php. 
-// We add default empty values to prevent crashes if data is missing.
 const Dashboard = ({ 
   transactions = [], 
-  savings = 0, 
+  savings = [], 
   budgets = [], 
   onAddTransaction, 
   onAddSavings, 
   onEditSavings = (val) => console.log(val), 
   onCreateBudget, 
-  onEditBudget, 
-  onDeleteBudget 
+  onEditBudget = (data) => console.log(data), 
+  onDeleteBudget = (cat) => console.log(cat)
 }: DashboardProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+  // LOGIC FOR BACKEND DATA:
+  // Since 'savings' is now an array from the DB, we sum it for the StatsCards
+  const totalSavingsSum = savings.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+
+  // Original handlers kept intact
   const handleAddTransaction = (transaction: Transaction): void => {
     if (onAddTransaction) onAddTransaction(transaction);
     setIsModalOpen(false);
@@ -59,16 +65,14 @@ const Dashboard = ({
 
   return (
     <>
-      {/* 4. This sets the browser tab title without using Laravel's default header */}
       <Head title="Dashboard" />
-
-      {/* 5. NOTICE: We do NOT use <AppLayout> here. 
-          Your code below already handles the Sidebar and Layout. */}
       <div className="flex min-h-screen theme-bg">
         <Sidebar />
         
+        {/* Main Content */}
         <main className="flex-1 overflow-auto" style={{ marginLeft: '72px' }}>
-          <div className="p-8 max-w-[1600px] mx-auto">
+          <div className="p-6 xl:p-8">
+            
             {/* Header */}
             <motion.div 
               initial={{ opacity: 0, y: -20 }}
@@ -80,10 +84,10 @@ const Dashboard = ({
               <p className="theme-text-secondary">Welcome back! Here's your financial overview.</p>
             </motion.div>
 
-            {/* Stats Cards */}
+            {/* Stats Cards - Using backend transactions and summed savings */}
             <StatsCards 
               transactions={transactions} 
-              savings={savings}
+              savings={totalSavingsSum}
               onEditSavings={onEditSavings}
             />
 
@@ -120,7 +124,7 @@ const Dashboard = ({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsModalOpen(true)}
-          className="fixed bottom-8 right-8 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50"
+          className="fixed bottom-8 right-8 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50 transition-transform"
           style={{ 
             background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)',
           }}
@@ -132,6 +136,8 @@ const Dashboard = ({
         <QuickActionModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)}
+          // These props remain for the component to function, but 
+          // actual "Saving" happens via the router.post inside the Modal.
           onAddTransaction={handleAddTransaction}
           onAddSavings={handleAddSavings}
           onCreateBudget={handleCreateBudget}

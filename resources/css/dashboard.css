@@ -1,23 +1,28 @@
+/* ============================================
+   Dashboard Theme Styles
+   ============================================ */
+
+/* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ============================================
+   DEFAULT Theme Variables (Dark)
+   ============================================ */
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #141414;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-color-light: rgba(255, 255, 255, 0.05);
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-border: rgba(255, 255, 255, 0.1);
 }
 
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.App {
-  min-height: 100vh;
-}
-
-/* Theme Variables */
+/* ============================================
+   Dark Theme Override
+   ============================================ */
 [data-theme="dark"] {
   --bg-primary: #0a0a0a;
   --bg-secondary: #141414;
@@ -30,6 +35,9 @@ body {
   --input-border: rgba(255, 255, 255, 0.1);
 }
 
+/* ============================================
+   Light Theme Override
+   ============================================ */
 [data-theme="light"] {
   --bg-primary: #f8f9fa;
   --bg-secondary: #ffffff;
@@ -42,7 +50,9 @@ body {
   --input-border: rgba(0, 0, 0, 0.1);
 }
 
-/* Theme Classes */
+/* ============================================
+   Theme Utility Classes
+   ============================================ */
 .theme-bg {
   background-color: var(--bg-primary);
 }
@@ -67,12 +77,22 @@ body {
   border-color: var(--border-color-light);
 }
 
+/* ============================================
+   Glassmorphic Card
+   ============================================ */
 .card-glass {
   background: var(--card-bg);
   backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
 }
 
+[data-theme="light"] .card-glass {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   Form Inputs
+   ============================================ */
 .theme-input {
   background-color: var(--input-bg);
   border-color: var(--input-border);
@@ -83,7 +103,9 @@ body {
   color: var(--text-secondary);
 }
 
-/* Sidebar theme styles */
+/* ============================================
+   Sidebar Styles
+   ============================================ */
 .theme-sidebar {
   background-color: #141414;
   border-color: var(--border-color);
@@ -102,12 +124,9 @@ body {
   color: var(--text-primary);
 }
 
-/* Light mode specific styles */
-[data-theme="light"] .card-glass {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-/* Custom scrollbar */
+/* ============================================
+   Custom Scrollbar (Optional - won't conflict)
+   ============================================ */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -130,12 +149,6 @@ body {
   background: rgba(129, 81, 217, 0.5);
 }
 
-/* Smooth transitions */
-button, input, select, textarea {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-}
-
-/* Remove number input arrows */
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;

@@ -1,9 +1,7 @@
 import { motion } from 'framer-motion';
-// 1. Swap useNavigate for the Inertia router
 import { router } from '@inertiajs/react'; 
 import { Receipt } from 'lucide-react';
 
-// 2. Fixed paths using the @ alias
 import { Badge } from '@/components/ui/badge'; 
 import { formatCurrency } from '@/utils/formatCurrency';
 import { Transaction } from '@/types/index';
@@ -12,13 +10,15 @@ interface RecentTransactionsProps {
   transactions: Transaction[];
 }
 
-const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
+const RecentTransactions = ({ transactions = [] }: RecentTransactionsProps) => {
   const isEmpty = transactions.length === 0;
 
+  // Optimized sorting for Backend Data: 
+  // We handle potential null times and ensure dates are parsed correctly
   const sortedTransactions = [...transactions].sort((a, b) => {
-    const dateA = new Date(a.date + (a.time ? 'T' + a.time : ''));
-    const dateB = new Date(b.date + (b.time ? 'T' + b.time : ''));
-    return dateB.getTime() - dateA.getTime();
+    const dateTimeA = new Date(`${a.date}T${a.time || '00:00:00'}`);
+    const dateTimeB = new Date(`${b.date}T${b.time || '00:00:00'}`);
+    return dateTimeB.getTime() - dateTimeA.getTime();
   });
 
   return (
@@ -69,7 +69,8 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
               </tr>
             </thead>
             <tbody>
-              {sortedTransactions.slice(0, 5).map((transaction, index) => (
+              {/* We show the top 8 recent items for a fuller dashboard feel */}
+              {sortedTransactions.slice(0, 8).map((transaction, index) => (
                 <motion.tr
                   key={transaction.id || index}
                   initial={{ opacity: 0, x: -20 }}
@@ -87,7 +88,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                   <td className="py-4 px-4">
                     <span className="theme-text font-medium">{transaction.category}</span>
                   </td>
-                  <td className="py-4 px-4 theme-text-secondary text-sm">
+                  <td className="py-4 px-4 theme-text-secondary text-sm truncate max-w-[150px]">
                     {transaction.note || '-'}
                   </td>
                   <td className="py-4 px-4 text-right">
@@ -103,7 +104,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                   <td className="py-4 px-4 text-center">
                     <Badge 
                       variant="outline" 
-                      className="border-0"
+                      className="border-0 capitalize"
                       style={{
                         backgroundColor: transaction.type === 'expense' 
                           ? 'rgba(239, 68, 68, 0.1)' 
@@ -111,7 +112,7 @@ const RecentTransactions = ({ transactions }: RecentTransactionsProps) => {
                         color: transaction.type === 'expense' ? '#ef4444' : '#10b981'
                       }}
                     >
-                      {transaction.type === 'expense' ? 'Expense' : 'Income'}
+                      {transaction.type}
                     </Badge>
                   </td>
                 </motion.tr>

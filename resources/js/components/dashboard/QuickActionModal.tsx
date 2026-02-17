@@ -1,4 +1,5 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
+import { router } from '@inertiajs/react'; // Add router here
 import { X, TrendingUp, TrendingDown, Clock, PiggyBank, Target } from 'lucide-react';
 import { Transaction, Budget, SavingsData } from '@/types/index';
 
@@ -54,31 +55,40 @@ const QuickActionModal = ({ isOpen, onClose, onAddTransaction, onAddSavings, onC
     
     if (activeTab === 'savings') {
       if (formData.amount) {
-        onAddSavings({
+        // Send to Laravel Savings controller
+        router.post('/savings', {
           amount: parseFloat(formData.amount),
           note: formData.note,
           date: formData.date
+        }, {
+          onSuccess: () => { resetForm(); onClose(); }
         });
-        resetForm();
       }
     } else if (activeTab === 'budget') {
       if (budgetData.category && budgetData.limit) {
-        onCreateBudget({
+        // Send to Laravel Budget controller
+        router.post('/budgets', {
           category: budgetData.category,
           limit: parseFloat(budgetData.limit),
           period: budgetData.period
+        }, {
+          onSuccess: () => { 
+            setBudgetData({ category: '', limit: '', period: 'month' }); 
+            onClose(); 
+          }
         });
-        setBudgetData({ category: '', limit: '', period: 'month' });
       }
     } else {
       if (formData.amount && formData.category) {
-        onAddTransaction({
+        // Send to Laravel Transactions controller
+        router.post('/transactions', {
           ...formData,
+          amount: parseFloat(formData.amount), // Convert string to number for DB
           type: activeTab as 'income' | 'expense',
-          id: Date.now(),
           time: activeTab === 'expense' ? formData.time : undefined
+        }, {
+          onSuccess: () => { resetForm(); onClose(); }
         });
-        resetForm();
       }
     }
   };
