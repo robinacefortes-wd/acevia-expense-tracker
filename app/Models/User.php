@@ -4,7 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany; // Added this import
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -53,25 +53,18 @@ class User extends Authenticatable
 
     /**
      * Get the transactions for the user.
+     * Note: If migration uses 'userid', add 'userid' as second parameter here too.
      */
-    public function transactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class);
+
+    public function transactions(): HasMany {
+        return $this->hasMany(Transaction::class); // Laravel assumes 'user_id'
     }
 
-    /**
-     * Get the savings for the user.
-     */
-    public function savings(): HasMany
-    {
-        return $this->hasMany(Saving::class);
+    public function savings(): HasMany {
+        return $this->hasMany(Saving::class); // Laravel assumes 'user_id'
     }
 
-    /**
-     * Get the budgets for the user.
-     */
-    public function budgets(): HasMany
-    {
-        return $this->hasMany(Budget::class);
+    public function budgets(): HasMany {
+        return $this->hasMany(Budget::class); // Laravel assumes 'user_id'
     }
 }

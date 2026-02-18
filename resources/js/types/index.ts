@@ -17,9 +17,11 @@ export interface Transaction {
 }
 
 export interface Budget {
+  id: number;  
   category: string;
   limit: number;
   period: 'today' | 'week' | 'month' | 'year';
+  user_id?: number;  
 }
 
 export interface SavingsData {

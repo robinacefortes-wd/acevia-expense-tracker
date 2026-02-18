@@ -16,9 +16,20 @@ import { useGlobalState } from '@/context/StateContext';
 const ITEMS_PER_PAGE = 10;
 
 const AllTransactions = () => {
-  // 4. Use the Global State instead of passing props
-  const { transactions } = useGlobalState();
-  
+  const state = useGlobalState();
+// ADD THIS CHECK: If state is null, stop and show a loader
+    if (!state) {
+      return (
+        <div className="flex min-h-screen theme-bg items-center justify-center">
+          <div className="text-purple-500 animate-pulse text-xl font-semibold">
+            Loading Transactions...
+          </div>
+        </div>
+      );
+    }
+
+  // Now it is safe to destructure  const { transactions } = state;  
+
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterMonth, setFilterMonth] = useState<string>('all');

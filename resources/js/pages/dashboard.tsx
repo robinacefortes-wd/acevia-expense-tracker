@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 
 import Sidebar from '@/components/dashboard/Sidebar';
 import StatsCards from '@/components/dashboard/StatsCards';
@@ -24,10 +25,8 @@ interface DashboardProps {
   // Original Props (Keeping these for compatibility)
   onAddTransaction?: (transaction: Transaction) => void;
   onAddSavings?: (savingsData: SavingsData) => void;
-  onEditSavings?: (newAmount: number) => void;
+  onEditSavings?: (newAmount: number, date: string) => void; 
   onCreateBudget?: (budgetData: Budget) => void;
-  onEditBudget?: (budgetData: Budget) => void;
-  onDeleteBudget?: (category: string) => void;
 }
 
 const Dashboard = ({ 
@@ -36,21 +35,42 @@ const Dashboard = ({
   budgets = [], 
   onAddTransaction, 
   onAddSavings, 
-  onEditSavings = (val) => console.log(val), 
+  onEditSavings = (amount, date) => console.log(amount, date), 
   onCreateBudget, 
-  onEditBudget = (data) => console.log(data), 
-  onDeleteBudget = (cat) => console.log(cat)
 }: DashboardProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   // LOGIC FOR BACKEND DATA:
-  // Since 'savings' is now an array from the DB, we sum it for the StatsCards
   const totalSavingsSum = savings.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
 
-  // Original handlers kept intact
   const handleAddTransaction = (transaction: Transaction): void => {
     if (onAddTransaction) onAddTransaction(transaction);
     setIsModalOpen(false);
+  };
+
+  const handleEditTransaction = (transactionData: Transaction) => {
+      router.post('/transactions/update', { 
+          id: transactionData.id,
+          amount: transactionData.amount,
+          category: transactionData.category,
+          date: transactionData.date,
+          note: transactionData.note,
+          type: transactionData.type,
+      }, {
+          preserveScroll: true,
+          onSuccess: () => console.log("Transaction Updated!"),
+      });
+  };
+
+  const handleDeleteTransaction = (transaction: Transaction) => {
+      if (confirm(`Delete transaction: ${transaction.category} - ${transaction.amount}?`)) {
+          router.post('/transactions/delete', { 
+              id: transaction.id 
+          }, {
+              preserveScroll: true,
+              onSuccess: () => console.log("Transaction removed")
+          });
+      }
   };
 
   const handleAddSavings = (savingsData: SavingsData): void => {
@@ -58,9 +78,43 @@ const Dashboard = ({
     setIsModalOpen(false);
   };
 
+  const handleEditSavings = (amount: number, date: string) => {
+    router.post('/savings', { 
+      amount: amount,
+      date: date,
+      note: 'Updated via Dashboard Stats',
+      update_total: true, 
+    }, {
+      preserveScroll: true,
+      onSuccess: () => console.log("Success!"),
+    });
+  };
+
   const handleCreateBudget = (budgetData: Budget): void => {
     if (onCreateBudget) onCreateBudget(budgetData);
     setIsModalOpen(false);
+  };
+
+  const handleEditBudget = (budgetData: Budget) => {
+      router.post('/budgets/update', { 
+          id: budgetData.id,
+          limit: budgetData.limit,
+          period: budgetData.period,
+      }, {
+          preserveScroll: true,
+          onSuccess: () => console.log("Budget Updated!"),
+      });
+  };
+
+  const handleDeleteBudget = (budget: Budget) => {
+      if (confirm(`Are you sure you want to delete the ${budget.category} budget?`)) {
+          router.post('/budgets/delete', { 
+              id: budget.id 
+          }, {
+              preserveScroll: true,
+              onSuccess: () => console.log("Deleted successfully")
+          });
+      }
   };
 
   return (
@@ -88,7 +142,7 @@ const Dashboard = ({
             <StatsCards 
               transactions={transactions} 
               savings={totalSavingsSum}
-              onEditSavings={onEditSavings}
+              onEditSavings={handleEditSavings}
             />
 
             {/* Charts Section */}
@@ -107,12 +161,16 @@ const Dashboard = ({
                 <BudgetManagement 
                   transactions={transactions} 
                   budgets={budgets}
-                  onEditBudget={onEditBudget}
-                  onDeleteBudget={onDeleteBudget}
+                  onEditBudget={handleEditBudget}
+                  onDeleteBudget={handleDeleteBudget}
                 />
               </div>
               <div className="lg:col-span-2">
-                <RecentTransactions transactions={transactions} />
+                <RecentTransactions 
+                    transactions={transactions}
+                    onDeleteTransaction={handleDeleteTransaction}
+                    onEditTransaction={handleEditTransaction} 
+                />
               </div>
             </div>
           </div>

@@ -47,14 +47,24 @@ const SmartTrackingChart = ({ transactions }: SmartTrackingChartProps) => {
         startDate = new Date(now.getFullYear(), 0, 1);
         break;
       default: // 7days
-        startDate = new Date(now.setDate(now.getDate() - 7));
+        const sevenDaysAgo = new Date();
+        startDate = new Date(sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7));
     }
 
-    const filtered = transactions.filter(t => {
+    // 1. Sort transactions CHRONOLOGICALLY first
+    const sortedTransactions = [...transactions].sort((a, b) => {
+      const dateA = new Date(a.date + (a.time ? 'T' + a.time : ''));
+      const dateB = new Date(b.date + (b.time ? 'T' + b.time : ''));
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    // 2. Filter the sorted transactions
+    const filtered = sortedTransactions.filter(t => {
       const transDate = new Date(t.date);
       return transDate >= startDate;
     });
 
+    // 3. Grouped (they will stay in order now)
     const grouped = filtered.reduce<Record<string, ChartDataPoint>>((acc, t) => {
       let key: string;
       const transDate = new Date(t.date + (t.time ? 'T' + t.time : ''));

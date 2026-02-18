@@ -8,7 +8,7 @@ interface BudgetManagementProps {
   transactions: Transaction[];
   budgets: Budget[];
   onEditBudget: (budgetData: Budget) => void;
-  onDeleteBudget: (category: string) => void;
+  onDeleteBudget: (budget: Budget) => void;
 }
 
 interface BudgetWithDisplay extends Budget {
@@ -71,14 +71,14 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
   };
 
   const handleSaveEdit = (): void => {
-    if (editForm.limit && parseFloat(editForm.limit) > 0) {
-      onEditBudget({
-        category: editForm.category,
-        limit: parseFloat(editForm.limit),
-        period: editForm.period
-      });
-      setEditingBudget(null);
-    }
+      if (editingBudget && editForm.limit && parseFloat(editForm.limit) > 0) {
+          onEditBudget({
+              ...editingBudget, 
+              limit: parseFloat(editForm.limit),
+              period: editForm.period
+          });
+          setEditingBudget(null); 
+      }
   };
 
   const periodLabels: Record<string, string> = {
@@ -159,9 +159,8 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
                         <Pencil className="w-4 h-4 theme-text-secondary" />
                       </button>
                       <button
-                        onClick={() => onDeleteBudget(budget.category)}
+                        onClick={() => onDeleteBudget(budget)} // Ensure this is the whole budget object
                         className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
-                        title="Delete Budget"
                       >
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </button>
@@ -294,5 +293,6 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
     </>
   );
 };
+
 
 export default BudgetManagement;

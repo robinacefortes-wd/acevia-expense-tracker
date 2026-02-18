@@ -7,7 +7,7 @@ import { Transaction } from '@/types/index';
 interface StatsCardsProps {
   transactions: Transaction[];
   savings: number; // This is the totalSum we calculated in Dashboard.tsx
-  onEditSavings: (newAmount: number) => void;
+  onEditSavings: (amount: number, date: string) => void;
 }
 
 interface Stat {
@@ -88,13 +88,16 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
     setShowEditModal(true);
   };
 
+
   const handleSaveEdit = (): void => {
     const amount = parseFloat(editAmount);
     if (!isNaN(amount) && amount >= 0) {
-      onEditSavings(amount);
-      setShowEditModal(false);
+      const today = new Date().toISOString().split('T')[0];
+      onEditSavings(amount, today); // Calls Dashboard.tsx logic
+      setShowEditModal(false);     // Closes the modal locally
     }
   };
+
 
   const stats: Stat[] = [
     {
@@ -233,7 +236,7 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
                   className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
                 >
-                  Save
+                  Save Changes
                 </button>
               </div>
             </div>
