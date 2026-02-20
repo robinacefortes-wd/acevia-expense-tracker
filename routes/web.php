@@ -25,9 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // All Transactions Page
-    Route::get('/transactions', function () {
-    return inertia('AllTransactions');
-    })->name('transactions.index');
+    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
 
     // Financial Actions
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');

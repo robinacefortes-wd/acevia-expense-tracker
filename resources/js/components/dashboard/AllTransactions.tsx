@@ -1,35 +1,32 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 // 1. Correct Inertia Import
-import { router } from '@inertiajs/react'; 
+import { router, usePage } from '@inertiajs/react'; 
 import { ArrowLeft, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react'; 
 
-// 2. Updated paths using the @ alias
 import Sidebar from '@/components/dashboard/Sidebar';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { Transaction } from '@/types/index';
 
-// 3. Import the global state hook
-import { useGlobalState } from '@/context/StateContext';
-
 const ITEMS_PER_PAGE = 10;
 
 const AllTransactions = () => {
-  const state = useGlobalState();
-// ADD THIS CHECK: If state is null, stop and show a loader
-    if (!state) {
-      return (
-        <div className="flex min-h-screen theme-bg items-center justify-center">
-          <div className="text-purple-500 animate-pulse text-xl font-semibold">
-            Loading Transactions...
-          </div>
-        </div>
-      );
-    }
+  const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];
+  const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Healthcare', 'Other'];
 
-  // Now it is safe to destructure  const { transactions } = state;  
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
+  const [editForm, setEditForm] = useState({
+    amount: '',
+    category: '',
+    date: '',
+    note: '',
+    type: 'expense' as 'income' | 'expense'
+  })
 
+  const { transactions = [] } = usePage<{ transactions: Transaction[] }>().props;
+   
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterMonth, setFilterMonth] = useState<string>('all');
@@ -88,6 +85,38 @@ const AllTransactions = () => {
     setCurrentPage(1);
   };
 
+  const handleEditClick = (tx: Transaction) => {
+    setEditForm({
+      amount: tx.amount.toString(),
+      category: tx.category,
+      date: tx.date,
+      note: tx.note || '',
+      type: tx.type
+    });
+    setEditingTx(tx);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingTx) {
+      router.post('/transactions/update', {
+        id: editingTx.id,
+        amount: parseFloat(editForm.amount),
+        category: editForm.category,
+        date: editForm.date,
+        note: editForm.note,
+        type: editForm.type
+      }, {
+        onSuccess: () => setEditingTx(null)
+      });
+    }
+  };
+
+  const handleDelete = (tx: Transaction) => {
+    if (confirm('Are you sure you want to delete this transaction?')) {
+      router.post('/transactions/delete', { id: tx.id });
+    }
+  };
+
   return (
     <div className="flex min-h-screen theme-bg">
       <Sidebar />
@@ -103,13 +132,13 @@ const AllTransactions = () => {
           >
             {/* 5. Fixed Back Button to use router.visit */}
             <button
-              onClick={() => router.visit('/')}
+            onClick={() => router.visit('/dashboard')}
               className="flex items-center gap-2 theme-text-secondary hover:theme-text mb-4 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Dashboard</span>
             </button>
-            <h1 className="text-4xl font-bold theme-text mb-2">All Transactions</h1>
+            <h1 className="text-4xl font-bold theme-text mb-2">Records</h1>
             <p className="theme-text-secondary">View and manage all your transactions</p>
           </motion.div>
 
@@ -207,6 +236,7 @@ const AllTransactions = () => {
                         <th className="text-left py-3 px-4 theme-text-secondary font-medium text-sm">Note</th>
                         <th className="text-right py-3 px-4 theme-text-secondary font-medium text-sm">Amount</th>
                         <th className="text-center py-3 px-4 theme-text-secondary font-medium text-sm">Type</th>
+                        <th className="text-right py-3 px-4 theme-text-secondary font-medium text-sm">Actions</th> 
                       </tr>
                     </thead>
                     <tbody>
@@ -244,6 +274,23 @@ const AllTransactions = () => {
                               {transaction.type === 'expense' ? 'Expense' : 'Income'}
                             </Badge>
                           </td>
+
+                          <td className="py-4 px-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => handleEditClick(transaction)}
+                                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                              >
+                                <Pencil className="w-4 h-4 theme-text-secondary" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(transaction)}
+                                className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </button>
+                            </div>
+                          </td>
                         </motion.tr>
                       ))}
                     </tbody>
@@ -272,6 +319,108 @@ const AllTransactions = () => {
                         <ChevronRight />
                       </button>
                     </div>
+                  </div>
+                )}
+
+                {/* --- EDIT TRANSACTION MODAL --- */}
+                {editingTx && (
+                  <div 
+                    className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
+                    onClick={() => setEditingTx(null)}
+                  >
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="w-full max-w-md rounded-2xl p-6"
+                      style={{
+                        background: 'rgba(20, 20, 20, 0.98)',
+                        backdropFilter: 'blur(24px)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)'
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-bold text-white">Edit Transaction</h3>
+                        <span 
+                          className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded"
+                          style={{ 
+                            backgroundColor: editForm.type === 'income' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                            color: editForm.type === 'income' ? '#10b981' : '#ef4444'
+                          }}
+                        >
+                          {editForm.type}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-gray-300 text-sm font-medium mb-2 block">Amount (₱)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={editForm.amount}
+                            onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all text-lg"
+                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-gray-300 text-sm font-medium mb-2 block">Category</label>
+                            <select
+                              value={editForm.category}
+                              onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                              className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all cursor-pointer"
+                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
+                            >
+                              {(editForm.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((cat) => (
+                                <option key={cat} value={cat} style={{ backgroundColor: '#1a1a1a' }}>{cat}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-gray-300 text-sm font-medium mb-2 block">Date</label>
+                            <input
+                              type="date"
+                              value={editForm.date}
+                              onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                              className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
+                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-gray-300 text-sm font-medium mb-2 block">Note (Optional)</label>
+                          <input
+                            type="text"
+                            value={editForm.note}
+                            onChange={(e) => setEditForm({ ...editForm, note: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
+                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
+                          />
+                        </div>
+
+                        <div className="flex gap-3 pt-4">
+                          <button
+                            onClick={() => setEditingTx(null)}
+                            className="flex-1 px-4 py-3 rounded-lg border font-medium transition-colors hover:bg-white/5"
+                            style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: '#9ca3af' }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleSaveEdit}
+                            className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90"
+                            style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
+                          >
+                            Save Changes
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
                   </div>
                 )}
               </>

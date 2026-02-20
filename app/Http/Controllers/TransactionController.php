@@ -3,11 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transaction;
+use Inertia\Inertia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TransactionController extends Controller
 {
+
+    public function index()
+    {
+        $user = Auth::user();
+        
+        $transactions = $user->transactions()
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return Inertia::render('AllTransactions', [
+            'transactions' => $transactions,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

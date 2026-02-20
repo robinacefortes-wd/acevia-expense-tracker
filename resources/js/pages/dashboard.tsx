@@ -10,7 +10,9 @@ import SmartTrackingChart from '@/components/dashboard/SmartTrackingChart';
 import SpendingCategories from '@/components/dashboard/SpendingCategories';
 import BudgetManagement from '@/components/dashboard/BudgetManagement';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
+import MiniCalculator from '@/components/dashboard/MiniCalculator';
 import QuickActionModal from '@/components/dashboard/QuickActionModal';
+
 
 import '@/../css/dashboard.css'; 
 
@@ -176,6 +178,7 @@ const Dashboard = ({
           </div>
         </main>
 
+
         {/* Quick Action Button */}
         <motion.button
           data-testid="quick-action-button"
@@ -189,13 +192,14 @@ const Dashboard = ({
         >
           <Plus className="w-8 h-8 text-white" />
         </motion.button>
+        
+        {/* Mini Calculator Modal */}
+        <MiniCalculator />
 
         {/* Quick Action Modal */}
         <QuickActionModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)}
-          // These props remain for the component to function, but 
-          // actual "Saving" happens via the router.post inside the Modal.
           onAddTransaction={handleAddTransaction}
           onAddSavings={handleAddSavings}
           onCreateBudget={handleCreateBudget}

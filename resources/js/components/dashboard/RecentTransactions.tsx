@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { router, Link} from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { Receipt, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -77,10 +77,13 @@ const RecentTransactions = ({
       >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold theme-text">Recent Transactions</h3>
-          {/* Change <a> to Inertia <Link> */}
-        <Link href="/transactions" className="text-sm font-medium" style={{ color: '#8151d9' }}>
+        <button
+          onClick={() => router.visit('/transactions')}
+          className="text-sm font-medium"
+          style={{ color: '#8151d9' }}
+        >
           View All
-        </Link>
+        </button>
         </div>
 
         {isEmpty ? (
@@ -107,7 +110,7 @@ const RecentTransactions = ({
                   <th className="text-left py-3 px-4 theme-text-secondary font-medium text-sm">Category</th>
                   <th className="text-left py-3 px-4 theme-text-secondary font-medium text-sm">Note</th>
                   <th className="text-right py-3 px-4 theme-text-secondary font-medium text-sm">Amount</th>
-                  <th className="text-center py-3 px-4 theme-text-secondary font-medium text-sm">Status</th>
+                  <th className="text-center py-3 px-4 theme-text-secondary font-medium text-sm">Type</th>
                   <th className="text-right py-3 px-4 theme-text-secondary font-medium text-sm">Actions</th>
                 </tr>
               </thead>

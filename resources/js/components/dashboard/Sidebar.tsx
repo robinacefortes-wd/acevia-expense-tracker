@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from '@inertiajs/react';
-import { LayoutDashboard, Receipt, Target, Settings, Sun, Moon, LogOut, LucideIcon } from 'lucide-react';
+import { LayoutDashboard, Receipt, Sun, Moon, LogOut, LucideIcon } from 'lucide-react';
 import { useTheme } from '@/components/dashboard/ThemeContext';
 
 declare const route: any;
@@ -14,9 +14,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: 'Dashboard', active: true },
-  { icon: Receipt, label: 'Transactions', active: false },
-  { icon: Target, label: 'Budgets', active: false },
-  { icon: Settings, label: 'Settings', active: false },
+  { icon: Receipt, label: 'Records', active: false },
 ];
 
 const Sidebar = () => {
@@ -73,7 +71,6 @@ const Sidebar = () => {
         {/* Navigation */}
         <nav className="flex-1 px-3">
           {menuItems.map((item, index) => (
-            /* Wrap the motion div in a Link */
             <Link 
               key={index} 
               href={item.label === 'Dashboard' ? '/dashboard' : '/transactions'}
@@ -127,10 +124,10 @@ const Sidebar = () => {
             )}
           </motion.button>
 
-          {/* Divider line*/}
+          {/* Divider */}
           <div className="mx-4 my-4 border-t border-gray-200 dark:border-gray-800 opacity-50" />
 
-          {/* Logout Button - Hardcoded for testing */}
+          {/* Logout Button */}
           <Link
             href="/logout" 
             method="post"
