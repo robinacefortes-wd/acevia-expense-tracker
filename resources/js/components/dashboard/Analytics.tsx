@@ -29,22 +29,15 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const getDaysInMonth = (year: number, month: number): number =>
   new Date(year, month + 1, 0).getDate();
 
-// ─── Custom Tooltip (declared OUTSIDE component to avoid re-creation on render) ─
-interface TooltipPayloadEntry {
-  dataKey: string;
-  name: string;
-  value: number;
-  color: string;
-}
-
+// ─── Custom Tooltip ───────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
       <div className="px-4 py-3 rounded-xl" style={{ background: 'rgba(10,10,10,0.95)', border: '1px solid rgba(129,81,217,0.3)' }}>
         <p className="text-xs text-gray-400 mb-2">{label}</p>
-        {(payload as TooltipPayloadEntry[]).map((p) => (
-          <p key={p.dataKey} className="text-sm font-semibold" style={{ color: p.color }}>
-            {p.name}: {formatCurrency(p.value)}
+        {payload.map((p) => (
+          <p key={p.dataKey as string} className="text-sm font-semibold" style={{ color: p.color }}>
+            {p.name}: {formatCurrency(p.value as number)}
           </p>
         ))}
       </div>
@@ -73,7 +66,7 @@ const Analytics = () => {
     return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }, []);
 
-  // ─── Date Range helpers (stable, inlined into useMemo to satisfy exhaustive-deps) ─
+  // ─── Date Range helpers ───────────────────────────────────────────────────
   const getStartDate = useCallback((range: DateRange): Date => {
     const now = new Date();
     switch (range) {
@@ -254,7 +247,7 @@ const Analytics = () => {
     transition: { duration: 0.5, delay },
   });
 
-  // ─── No-spend days helper (reused in breakdown cards) ────────────────────
+  // ─── No-spend days helper ─────────────────────────────────────────────────
   const getNoSpendDays = useCallback(() => {
     const expDays = new Set(filteredTransactions.filter(t => t.type === 'expense').map(t => t.date));
     const now = new Date();
