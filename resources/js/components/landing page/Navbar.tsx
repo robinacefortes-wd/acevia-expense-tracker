@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from '@inertiajs/react';
 import { Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState<boolean>(false);

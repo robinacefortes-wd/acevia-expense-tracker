@@ -1,6 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { Wallet, TrendingUp, PieChart, Bell, Lock, Smartphone } from 'lucide-react';
+import React from 'react';
 
 interface Feature {
   icon: React.ReactNode;

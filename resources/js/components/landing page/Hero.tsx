@@ -1,6 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import React from 'react';
 
 const Hero: React.FC = () => {
   return (
@@ -258,7 +258,7 @@ const Hero: React.FC = () => {
                   </div>
 
                   <div className="flex flex-col">
-                    <p className="text-[var(--text-muted)] text-xs">Insights</p>
+                    <p className="text-[var(--text-muted)] text-xs">Transactions</p>
                     <p className="text-sm font-medium text-[var(--text-primary)]">
                       12 New
                     </p>

@@ -1,122 +1,105 @@
-import { useState } from 'react';
+import { Head, router } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
-import { Head, router } from '@inertiajs/react';
-import { route } from 'ziggy-js';
+import { useState } from 'react';
 
-import Sidebar from '@/components/dashboard/Sidebar';
-import StatsCards from '@/components/dashboard/StatsCards';
-import SmartTrackingChart from '@/components/dashboard/SmartTrackingChart';
-import SpendingCategories from '@/components/dashboard/SpendingCategories';
 import BudgetManagement from '@/components/dashboard/BudgetManagement';
-import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import MiniCalculator from '@/components/dashboard/MiniCalculator';
 import QuickActionModal from '@/components/dashboard/QuickActionModal';
+import RecentTransactions from '@/components/dashboard/RecentTransactions';
+import Sidebar from '@/components/dashboard/Sidebar';
+import SmartTrackingChart from '@/components/dashboard/SmartTrackingChart';
+import SpendingCategories from '@/components/dashboard/SpendingCategories';
+import StatsCards from '@/components/dashboard/StatsCards';
 
+import type { Transaction, Budget, SavingsData } from '@/types/index';
 
-import '@/../css/dashboard.css'; 
-
-import { Transaction, Budget, SavingsData } from '@/types/index';
+interface SavingsEntry {
+  amount: string | number;
+}
 
 interface DashboardProps {
-  // Data coming from DashboardController.php
   transactions: Transaction[];
-  savings: any[]; 
+  savings: SavingsEntry[];
   budgets: Budget[];
-  
-  // Original Props (Keeping these for compatibility)
   onAddTransaction?: (transaction: Transaction) => void;
   onAddSavings?: (savingsData: SavingsData) => void;
-  onEditSavings?: (newAmount: number, date: string) => void; 
   onCreateBudget?: (budgetData: Budget) => void;
 }
 
-const Dashboard = ({ 
-  transactions = [], 
-  savings = [], 
-  budgets = [], 
-  onAddTransaction, 
-  onAddSavings, 
-  onEditSavings = (amount, date) => console.log(amount, date), 
-  onCreateBudget, 
+const Dashboard = ({
+  transactions = [],
+  savings = [],
+  budgets = [],
 }: DashboardProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  // LOGIC FOR BACKEND DATA:
-  const totalSavingsSum = savings.reduce((acc, curr) => acc + parseFloat(curr.amount || 0), 0);
+  // Sort transactions by date+time descending — done once, used everywhere
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    const dateA = new Date(`${a.date}T${a.time || '00:00:00'}`);
+    const dateB = new Date(`${b.date}T${b.time || '00:00:00'}`);
+    return dateB.getTime() - dateA.getTime();
+  });
 
-  const handleAddTransaction = (transaction: Transaction): void => {
-    if (onAddTransaction) onAddTransaction(transaction);
-    setIsModalOpen(false);
-  };
+  const totalSavingsSum = savings.reduce((acc, curr) => acc + parseFloat(String(curr.amount || 0)), 0);
 
   const handleEditTransaction = (transactionData: Transaction) => {
-      router.post('/transactions/update', { 
-          id: transactionData.id,
-          amount: transactionData.amount,
-          category: transactionData.category,
-          date: transactionData.date,
-          note: transactionData.note,
-          type: transactionData.type,
-      }, {
-          preserveScroll: true,
-          onSuccess: () => console.log("Transaction Updated!"),
-      });
+    router.post('/transactions/update', {
+      id: transactionData.id,
+      amount: transactionData.amount,
+      category: transactionData.category,
+      date: transactionData.date,
+      note: transactionData.note,
+      type: transactionData.type,
+    }, {
+      preserveScroll: true,
+      onSuccess: () => console.log("Transaction Updated!"),
+    });
   };
 
   const handleDeleteTransaction = (transaction: Transaction) => {
-      if (confirm(`Delete transaction: ${transaction.category} - ${transaction.amount}?`)) {
-          router.post('/transactions/delete', { 
-              id: transaction.id 
-          }, {
-              preserveScroll: true,
-              onSuccess: () => console.log("Transaction removed")
-          });
-      }
-  };
-
-  const handleAddSavings = (savingsData: SavingsData): void => {
-    if (onAddSavings) onAddSavings(savingsData);
-    setIsModalOpen(false);
+    if (confirm(`Delete transaction: ${transaction.category} - ${transaction.amount}?`)) {
+      router.post('/transactions/delete', {
+        id: transaction.id
+      }, {
+        preserveScroll: true,
+        onSuccess: () => console.log("Transaction removed")
+      });
+    }
   };
 
   const handleEditSavings = (amount: number, date: string) => {
-    router.post('/savings', { 
+    router.post('/savings', {
       amount: amount,
       date: date,
       note: 'Updated via Dashboard Stats',
-      update_total: true, 
+      update_total: true,
     }, {
       preserveScroll: true,
       onSuccess: () => console.log("Success!"),
     });
   };
 
-  const handleCreateBudget = (budgetData: Budget): void => {
-    if (onCreateBudget) onCreateBudget(budgetData);
-    setIsModalOpen(false);
-  };
-
   const handleEditBudget = (budgetData: Budget) => {
-      router.post('/budgets/update', { 
-          id: budgetData.id,
-          limit: budgetData.limit,
-          period: budgetData.period,
-      }, {
-          preserveScroll: true,
-          onSuccess: () => console.log("Budget Updated!"),
-      });
+    router.post('/budgets/update', {
+      id: budgetData.id,
+      limit: budgetData.limit,
+      period: budgetData.period,
+    }, {
+      preserveScroll: true,
+      onSuccess: () => console.log("Budget Updated!"),
+    });
   };
 
   const handleDeleteBudget = (budget: Budget) => {
-      if (confirm(`Are you sure you want to delete the ${budget.category} budget?`)) {
-          router.post('/budgets/delete', { 
-              id: budget.id 
-          }, {
-              preserveScroll: true,
-              onSuccess: () => console.log("Deleted successfully")
-          });
-      }
+    if (confirm(`Are you sure you want to delete the ${budget.category} budget?`)) {
+      router.post('/budgets/delete', {
+        id: budget.id
+      }, {
+        preserveScroll: true,
+        onSuccess: () => console.log("Deleted successfully")
+      });
+    }
   };
 
   return (
@@ -124,13 +107,13 @@ const Dashboard = ({
       <Head title="Dashboard" />
       <div className="flex min-h-screen theme-bg">
         <Sidebar />
-        
+
         {/* Main Content */}
         <main className="flex-1 overflow-auto" style={{ marginLeft: '72px' }}>
           <div className="p-6 xl:p-8">
-            
+
             {/* Header */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -140,9 +123,9 @@ const Dashboard = ({
               <p className="theme-text-secondary">Welcome back! Here's your financial overview.</p>
             </motion.div>
 
-            {/* Stats Cards - Using backend transactions and summed savings */}
-            <StatsCards 
-              transactions={transactions} 
+            {/* Stats Cards */}
+            <StatsCards
+              transactions={sortedTransactions}
               savings={totalSavingsSum}
               onEditSavings={handleEditSavings}
             />
@@ -150,34 +133,33 @@ const Dashboard = ({
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
               <div className="lg:col-span-2">
-                <SmartTrackingChart transactions={transactions} />
+                <SmartTrackingChart transactions={sortedTransactions} />
               </div>
               <div>
-                <SpendingCategories transactions={transactions} />
+                <SpendingCategories transactions={sortedTransactions} />
               </div>
             </div>
 
             {/* Budget and Recent Transactions */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
               <div>
-                <BudgetManagement 
-                  transactions={transactions} 
+                <BudgetManagement
+                  transactions={sortedTransactions}
                   budgets={budgets}
                   onEditBudget={handleEditBudget}
                   onDeleteBudget={handleDeleteBudget}
                 />
               </div>
               <div className="lg:col-span-2">
-                <RecentTransactions 
-                    transactions={transactions}
-                    onDeleteTransaction={handleDeleteTransaction}
-                    onEditTransaction={handleEditTransaction} 
+                <RecentTransactions
+                  transactions={sortedTransactions}
+                  onDeleteTransaction={handleDeleteTransaction}
+                  onEditTransaction={handleEditTransaction}
                 />
               </div>
             </div>
           </div>
         </main>
-
 
         {/* Quick Action Button */}
         <motion.button
@@ -186,23 +168,20 @@ const Dashboard = ({
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsModalOpen(true)}
           className="fixed bottom-8 right-8 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50 transition-transform"
-          style={{ 
+          style={{
             background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)',
           }}
         >
           <Plus className="w-8 h-8 text-white" />
         </motion.button>
-        
+
         {/* Mini Calculator Modal */}
         <MiniCalculator />
 
         {/* Quick Action Modal */}
-        <QuickActionModal 
-          isOpen={isModalOpen} 
+        <QuickActionModal
+          isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onAddTransaction={handleAddTransaction}
-          onAddSavings={handleAddSavings}
-          onCreateBudget={handleCreateBudget}
         />
       </div>
     </>

@@ -1,8 +1,8 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Calendar } from 'lucide-react';
-import { Transaction } from '@/types/index';
+import { useState } from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import type { Transaction } from '@/types/index';
 
 interface SmartTrackingChartProps {
   transactions: Transaction[];
@@ -16,59 +16,81 @@ interface ChartDataPoint {
 
 type TimePeriod = 'today' | '7days' | 'month' | 'year';
 
-// Custom tooltip props interface
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: Array<{
-    value?: number;
-    payload?: ChartDataPoint;
-  }>;
+// ─── CustomTooltip declared OUTSIDE component to avoid re-creation on render ─
+interface TooltipEntry {
+  value?: number;
+  payload?: ChartDataPoint;
 }
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+}
+
+const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
+  if (active && payload && payload.length > 0) {
+    const dataPoint = payload[0].payload;
+    if (!dataPoint) return null;
+    return (
+      <div
+        className="px-4 py-3 rounded-xl"
+        style={{
+          background: 'rgba(0, 0, 0, 0.9)',
+          border: '1px solid rgba(129, 81, 217, 0.3)'
+        }}
+      >
+        <p className="text-gray-300 text-sm mb-1">{dataPoint.date}</p>
+        <p className="text-white font-semibold">
+          ₱{(payload[0].value ?? 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const SmartTrackingChart = ({ transactions }: SmartTrackingChartProps) => {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('7days');
 
   const generateChartData = (): ChartDataPoint[] => {
-    if (transactions.length === 0) {
-      return [];
-    }
+    if (transactions.length === 0) return [];
 
     const now = new Date();
     let startDate: Date;
 
     switch (timePeriod) {
-      case 'today':
+      case 'today': {
         startDate = new Date(now.setHours(0, 0, 0, 0));
         break;
-      case 'month':
+      }
+      case 'month': {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
         break;
-      case 'year':
+      }
+      case 'year': {
         startDate = new Date(now.getFullYear(), 0, 1);
         break;
-      default: // 7days
+      }
+      default: {
+        // 7days
         const sevenDaysAgo = new Date();
         startDate = new Date(sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7));
+      }
     }
 
-    // 1. Sort transactions CHRONOLOGICALLY first
     const sortedTransactions = [...transactions].sort((a, b) => {
       const dateA = new Date(a.date + (a.time ? 'T' + a.time : ''));
       const dateB = new Date(b.date + (b.time ? 'T' + b.time : ''));
       return dateA.getTime() - dateB.getTime();
     });
 
-    // 2. Filter the sorted transactions
-    const filtered = sortedTransactions.filter(t => {
-      const transDate = new Date(t.date);
-      return transDate >= startDate;
-    });
+    const filtered = sortedTransactions.filter(t => new Date(t.date) >= startDate);
 
-    // 3. Grouped (they will stay in order now)
+    const orderedKeys: string[] = [];
     const grouped = filtered.reduce<Record<string, ChartDataPoint>>((acc, t) => {
-      let key: string;
       const transDate = new Date(t.date + (t.time ? 'T' + t.time : ''));
-      
+      let key: string;
+
       if (timePeriod === 'today') {
         key = transDate.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
       } else if (timePeriod === 'year') {
@@ -76,9 +98,10 @@ const SmartTrackingChart = ({ transactions }: SmartTrackingChartProps) => {
       } else {
         key = transDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
       }
-      
+
       if (!acc[key]) {
         acc[key] = { date: key, expense: 0, income: 0 };
+        orderedKeys.push(key);
       }
       if (t.type === 'expense') {
         acc[key].expense += parseFloat(t.amount.toString());
@@ -88,7 +111,7 @@ const SmartTrackingChart = ({ transactions }: SmartTrackingChartProps) => {
       return acc;
     }, {});
 
-    return Object.values(grouped);
+    return orderedKeys.map(key => grouped[key]);
   };
 
   const data = generateChartData();
@@ -99,27 +122,6 @@ const SmartTrackingChart = ({ transactions }: SmartTrackingChartProps) => {
     '7days': 'Last 7 days',
     month: 'This Month',
     year: 'This Year'
-  };
-
-  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
-    if (active && payload && payload.length > 0 && payload[0].payload) {
-      const dataPoint = payload[0].payload;
-      return (
-        <div 
-          className="px-4 py-3 rounded-xl"
-          style={{
-            background: 'rgba(0, 0, 0, 0.9)',
-            border: '1px solid rgba(129, 81, 217, 0.3)'
-          }}
-        >
-          <p className="text-gray-300 text-sm mb-1">{dataPoint.date}</p>
-          <p className="text-white font-semibold">
-            ₱{(payload[0].value || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </p>
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
@@ -136,14 +138,14 @@ const SmartTrackingChart = ({ transactions }: SmartTrackingChartProps) => {
           <h3 className="text-xl font-semibold theme-text mb-1">Smart Tracking</h3>
           <p className="theme-text-secondary text-sm">Your spending patterns over time</p>
         </div>
-        
+
         {/* Time Period Filters */}
         <div className="flex items-center gap-2 flex-wrap">
           {(['today', '7days', 'month', 'year'] as TimePeriod[]).map((period) => (
             <button
               key={period}
               onClick={() => setTimePeriod(period)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm cursor-pointer font-medium transition-all ${
                 timePeriod === period
                   ? 'text-white'
                   : 'theme-text-secondary hover:theme-text'
@@ -162,9 +164,9 @@ const SmartTrackingChart = ({ transactions }: SmartTrackingChartProps) => {
 
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center" style={{ height: '320px' }}>
-          <div 
+          <div
             className="w-24 h-24 rounded-full flex items-center justify-center mb-4"
-            style={{ 
+            style={{
               background: 'linear-gradient(135deg, rgba(129, 81, 217, 0.2) 0%, rgba(161, 120, 232, 0.2) 100%)',
             }}
           >
@@ -185,23 +187,16 @@ const SmartTrackingChart = ({ transactions }: SmartTrackingChartProps) => {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-            <XAxis 
-              dataKey="date" 
-              stroke="#6b7280"
-              style={{ fontSize: '12px' }}
-            />
-            <YAxis 
-              stroke="#6b7280"
-              style={{ fontSize: '12px' }}
-            />
+            <XAxis dataKey="date" stroke="#6b7280" style={{ fontSize: '12px' }} />
+            <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
             <Tooltip content={<CustomTooltip />} />
-            <Area 
-              type="monotone" 
-              dataKey="expense" 
-              stroke="#8151d9" 
+            <Area
+              type="monotone"
+              dataKey="expense"
+              stroke="#8151d9"
               strokeWidth={3}
-              fillOpacity={1} 
-              fill="url(#colorExpense)" 
+              fillOpacity={1}
+              fill="url(#colorExpense)"
             />
           </AreaChart>
         </ResponsiveContainer>

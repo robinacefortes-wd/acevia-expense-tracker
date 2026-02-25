@@ -1,11 +1,11 @@
-import { motion } from 'framer-motion';
 import { router } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import { Receipt, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
+import type { Transaction } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { Transaction } from '@/types/index';
 
 interface RecentTransactionsProps {
   transactions: Transaction[];
@@ -59,12 +59,6 @@ const RecentTransactions = ({
     }
   };
 
-  const sortedTransactions = [...transactions].sort((a, b) => {
-    const dateTimeA = new Date(`${a.date}T${a.time || '00:00:00'}`);
-    const dateTimeB = new Date(`${b.date}T${b.time || '00:00:00'}`);
-    return dateTimeB.getTime() - dateTimeA.getTime();
-  });
-
   return (
     <>
       <motion.div
@@ -79,7 +73,7 @@ const RecentTransactions = ({
           <h3 className="text-xl font-semibold theme-text">Recent Transactions</h3>
         <button
           onClick={() => router.visit('/transactions')}
-          className="text-sm font-medium"
+          className="text-sm font-medium cursor-pointer"
           style={{ color: '#8151d9' }}
         >
           View All
@@ -115,7 +109,7 @@ const RecentTransactions = ({
                 </tr>
               </thead>
               <tbody>
-                {sortedTransactions.slice(0, 8).map((transaction, index) => (
+                {transactions.slice(0, 8).map((transaction, index) => (
                   <motion.tr
                     key={transaction.id || index}
                     initial={{ opacity: 0, x: -20 }}
@@ -166,11 +160,11 @@ const RecentTransactions = ({
                           onClick={() => handleEditClick(transaction)}
                           className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                         >
-                          <Pencil className="w-4 h-4 theme-text-secondary" />
+                          <Pencil className="w-4 h-4 theme-text-secondary cursor-pointer" />
                         </button>
                         <button
                           onClick={() => onDeleteTransaction(transaction)}
-                          className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </button>

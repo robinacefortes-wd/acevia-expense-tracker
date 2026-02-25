@@ -1,8 +1,9 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { UtensilsCrossed, Car, Gamepad2, ShoppingBag, Heart, MoreHorizontal, Pencil, Trash2, LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import { UtensilsCrossed, Car, Gamepad2, ShoppingBag, Heart, MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import type { Transaction, Budget } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { Transaction, Budget } from '@/types/index';
 
 interface BudgetManagementProps {
   transactions: Transaction[];
@@ -153,14 +154,14 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
                       </span>
                       <button
                         onClick={() => handleEditClick(budget)}
-                        className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                         title="Edit Budget"
                       >
                         <Pencil className="w-4 h-4 theme-text-secondary" />
                       </button>
                       <button
-                        onClick={() => onDeleteBudget(budget)} // Ensure this is the whole budget object
-                        className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
+                        onClick={() => onDeleteBudget(budget)} 
+                        className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </button>

@@ -12,7 +12,10 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         return Inertia::render('Dashboard', [
-            'transactions' => $user->transactions()->latest()->take(10)->get(),
+            'transactions' => $user->transactions()
+                ->orderBy('date', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->get(),
             'budgets' => $user->budgets()->get(),
             'savings' => $user->savings()->get(),
             'totalBalance' => $user->transactions()->where('type', 'income')->sum('amount') 

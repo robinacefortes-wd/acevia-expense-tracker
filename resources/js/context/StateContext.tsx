@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Transaction, Budget, SavingsData } from '@/types'; // Using your index.ts types
+import type { Transaction, Budget, SavingsData } from '@/types'; // Using your index.ts types
 
 interface StateContextType {
   transactions: Transaction[];

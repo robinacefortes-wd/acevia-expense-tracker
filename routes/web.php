@@ -10,6 +10,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\ProfileController;
 
 // 1. Public Routes
 Route::get('/', function () {
@@ -26,6 +28,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // All Transactions Page
     Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
+
+    // Analytics Page
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+
+    // Profile Management
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Financial Actions
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');

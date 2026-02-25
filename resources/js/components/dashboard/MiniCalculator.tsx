@@ -1,8 +1,16 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calculator, X, Delete } from 'lucide-react';
+import { useState } from 'react';
 
-const MiniCalculator = () => {
+interface MiniCalculatorProps {
+  buttonBottom?: string;
+  panelBottom?: string;
+}
+
+const MiniCalculator = ({
+  buttonBottom = 'bottom-28',
+  panelBottom = 'bottom-48'
+}: MiniCalculatorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [display, setDisplay] = useState('0');
   const [expression, setExpression] = useState('');
@@ -133,7 +141,7 @@ const MiniCalculator = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.85, y: 20 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-            className="fixed bottom-48 right-8 z-50 w-72 rounded-2xl overflow-hidden shadow-2xl"
+            className={`fixed ${panelBottom} right-8 z-50 w-72 rounded-2xl overflow-hidden shadow-2xl`}
             style={{
               background: 'rgba(15, 15, 20, 0.97)',
               backdropFilter: 'blur(24px)',
@@ -161,11 +169,9 @@ const MiniCalculator = () => {
 
             {/* Display */}
             <div className="px-4 pt-4 pb-2">
-              {/* Expression */}
               <div className="text-right text-xs mb-1 h-4" style={{ color: 'rgba(161, 120, 232, 0.6)' }}>
                 {expression}
               </div>
-              {/* Main display */}
               <div className="flex items-center justify-between">
                 <button
                   onClick={handleBackspace}
@@ -212,7 +218,7 @@ const MiniCalculator = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-28 right-8 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50"
+        className={`fixed ${buttonBottom} right-8 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50`}
         style={{
           background: isOpen
             ? 'linear-gradient(135deg, #a178e8 0%, #8151d9 100%)'
@@ -220,7 +226,7 @@ const MiniCalculator = () => {
           border: '2px solid rgba(255,255,255,0.1)',
         }}
       >
-        <Calculator className="w-7 h-7 text-white" />
+        <Calculator className="w-7 h-7 text-white cursor-pointer" />
       </motion.button>
     </>
   );

@@ -21,6 +21,7 @@ class TransactionController extends Controller
 
         return Inertia::render('AllTransactions', [
             'transactions' => $transactions,
+            'totalSavings' => $user->savings()->sum('amount'),
         ]);
     }
 

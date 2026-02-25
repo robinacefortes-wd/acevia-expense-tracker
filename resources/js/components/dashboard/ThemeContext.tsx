@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ThemeType } from '@/types/index';
+import type { ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ThemeType } from '@/types/index';
 
 interface ThemeContextType {
   theme: ThemeType;
@@ -21,14 +22,23 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
+  if (typeof window !== 'undefined') localStorage.removeItem('appearance');
+
   const [theme, setTheme] = useState<ThemeType>(() => {
     const saved = localStorage.getItem('acevia-theme');
     return (saved as ThemeType) || 'dark';
   });
 
   useEffect(() => {
-    localStorage.setItem('acevia-theme', theme);
-    document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('acevia-theme', theme);
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+      } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.colorScheme = 'light';
+      }
   }, [theme]);
 
   const toggleTheme = (): void => {

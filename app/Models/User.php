@@ -20,7 +20,9 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'phone',
         'email',
         'password',
     ];
@@ -50,11 +52,6 @@ class User extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
-
-    /**
-     * Get the transactions for the user.
-     * Note: If migration uses 'userid', add 'userid' as second parameter here too.
-     */
 
     public function transactions(): HasMany {
         return $this->hasMany(Transaction::class); // Laravel assumes 'user_id'

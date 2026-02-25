@@ -1,21 +1,25 @@
-import { useState } from 'react';
+import { router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-// 1. Correct Inertia Import
-import { router, usePage } from '@inertiajs/react'; 
-import { ArrowLeft, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Pencil, Trash2 } from 'lucide-react'; 
+import { ArrowLeft, Search, ChevronLeft, ChevronRight, Download, Pencil, Trash2, TrendingUp, TrendingDown, Wallet, PiggyBank } from 'lucide-react';
+import { useState } from 'react';
 
+import MiniCalculator from '@/components/dashboard/MiniCalculator';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { Badge } from '@/components/ui/badge';
+import type { Transaction } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { Transaction } from '@/types/index';
 
 const ITEMS_PER_PAGE = 10;
+const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];
+const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Healthcare', 'Other'];
 
 const AllTransactions = () => {
-  const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];
-  const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Healthcare', 'Other'];
+  const { transactions = [], totalSavings = 0 } = usePage<{ transactions: Transaction[]; totalSavings: number }>().props;
 
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+  const [filterMonth, setFilterMonth] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [editForm, setEditForm] = useState({
     amount: '',
@@ -23,16 +27,9 @@ const AllTransactions = () => {
     date: '',
     note: '',
     type: 'expense' as 'income' | 'expense'
-  })
+  });
 
-  const { transactions = [] } = usePage<{ transactions: Transaction[] }>().props;
-   
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
-  const [filterMonth, setFilterMonth] = useState<string>('all');
-  const [currentPage, setCurrentPage] = useState<number>(1);
-
-  // Generate list of available months from transactions
+  // --- MONTHS ---
   const getAvailableMonths = (): string[] => {
     const months = new Set<string>();
     transactions.forEach(t => {
@@ -51,40 +48,48 @@ const AllTransactions = () => {
     return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   };
 
-  // Sort transactions by date (latest first)
-  const sortedTransactions = [...transactions].sort((a, b) => {
-    const dateA = new Date(a.date + (a.time ? 'T' + a.time : ''));
-    const dateB = new Date(b.date + (b.time ? 'T' + b.time : ''));
-    return dateB.getTime() - dateA.getTime();
-  });
+  // --- FILTER + SORT ---
+  const processedTransactions = [...transactions]
+    .filter(t => {
+      const matchesSearch =
+        t.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (t.note && t.note.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesFilter = filterType === 'all' || t.type === filterType;
+      let matchesMonth = true;
+      if (filterMonth !== 'all') {
+        const transDate = new Date(t.date);
+        const transMonthYear = `${transDate.getFullYear()}-${String(transDate.getMonth() + 1).padStart(2, '0')}`;
+        matchesMonth = transMonthYear === filterMonth;
+      }
+      return matchesSearch && matchesFilter && matchesMonth;
+    })
+    .sort((a, b) => {
+      const valA = new Date(a.date + (a.time ? 'T' + a.time : ''));
+      const valB = new Date(b.date + (b.time ? 'T' + b.time : ''));
+      return valB.getTime() - valA.getTime();
+    });
 
-  // Filter transactions
-  const filteredTransactions = sortedTransactions.filter(t => {
-    const matchesSearch = t.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (t.note && t.note.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesFilter = filterType === 'all' || t.type === filterType;
-    
-    let matchesMonth = true;
-    if (filterMonth !== 'all') {
-      const transDate = new Date(t.date);
-      const transMonthYear = `${transDate.getFullYear()}-${String(transDate.getMonth() + 1).padStart(2, '0')}`;
-      matchesMonth = transMonthYear === filterMonth;
-    }
-    
-    return matchesSearch && matchesFilter && matchesMonth;
-  });
+  // --- SUMMARY ---
+  const totalIncome = processedTransactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + parseFloat(String(t.amount)), 0);
+  const totalExpenses = processedTransactions
+    .filter(t => t.type === 'expense')
+    .reduce((sum, t) => sum + parseFloat(String(t.amount)), 0);
+  const netBalance = totalIncome - totalExpenses;
 
-  // Pagination
-  const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
+  // --- PAGINATION ---
+  const totalPages = Math.ceil(processedTransactions.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
+  const paginatedTransactions = processedTransactions.slice(startIndex, endIndex);
 
   const handleFilterChange = <T,>(setter: React.Dispatch<React.SetStateAction<T>>) => (value: T): void => {
     setter(value);
     setCurrentPage(1);
   };
 
+  // --- EDIT ---
   const handleEditClick = (tx: Transaction) => {
     setEditForm({
       amount: tx.amount.toString(),
@@ -105,9 +110,7 @@ const AllTransactions = () => {
         date: editForm.date,
         note: editForm.note,
         type: editForm.type
-      }, {
-        onSuccess: () => setEditingTx(null)
-      });
+      }, { onSuccess: () => setEditingTx(null) });
     }
   };
 
@@ -117,12 +120,35 @@ const AllTransactions = () => {
     }
   };
 
+  // --- CSV EXPORT ---
+  const handleExportCSV = () => {
+    const headers = ['Date', 'Category', 'Note', 'Amount', 'Type'];
+    const rows = processedTransactions.map(t => [
+      new Date(t.date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }),
+      t.category,
+      t.note || '',
+      t.type === 'expense' ? `-${t.amount}` : `${t.amount}`,
+      t.type
+    ]);
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `transactions-${filterMonth !== 'all' ? filterMonth : 'all'}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="flex min-h-screen theme-bg">
       <Sidebar />
-      
+
       <main className="flex-1 overflow-auto" style={{ marginLeft: '72px' }}>
-        <div className="p-8 max-w-[1600px] mx-auto">
+        <div className="p-8">
+
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -130,100 +156,169 @@ const AllTransactions = () => {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            {/* 5. Fixed Back Button to use router.visit */}
             <button
-            onClick={() => router.visit('/dashboard')}
-              className="flex items-center gap-2 theme-text-secondary hover:theme-text mb-4 transition-colors"
+              onClick={() => router.visit('/dashboard')}
+              className="flex items-center gap-2 theme-text-secondary hover:theme-text mb-4 transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Dashboard</span>
             </button>
-            <h1 className="text-4xl font-bold theme-text mb-2">Records</h1>
-            <p className="theme-text-secondary">View and manage all your transactions</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold theme-text mb-2">Records</h1>
+                <p className="theme-text-secondary">View and manage all your transactions</p>
+              </div>
+              <button
+                onClick={handleExportCSV}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)', color: '#fff' }}
+              >
+                <Download className="w-4 h-4" />
+                Export CSV
+              </button>
+            </div>
           </motion.div>
 
-          {/* Filters and Search */}
+          {/* Summary Bar — 4 cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.05 }}
+            className="grid grid-cols-4 gap-4 mb-6"
+          >
+            {/* Total Income */}
+            <div className="card-glass rounded-2xl p-5 flex items-center gap-4" style={{ borderLeft: '3px solid #10b981' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)' }}>
+                <TrendingUp className="w-5 h-5" style={{ color: '#10b981' }} />
+              </div>
+              <div>
+                <p className="theme-text-secondary text-xs font-medium mb-1">
+                  Total Income
+                  {filterType === 'expense' && <span className="ml-1 opacity-50">(filtered out)</span>}
+                  {filterMonth !== 'all' ? ` · ${getMonthLabel(filterMonth)}` : ''}
+                </p>
+                <p className="text-xl font-bold" style={{ color: '#10b981' }}>+{formatCurrency(totalIncome)}</p>
+              </div>
+            </div>
+
+            {/* Total Expenses */}
+            <div className="card-glass rounded-2xl p-5 flex items-center gap-4" style={{ borderLeft: '3px solid #ef4444' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)' }}>
+                <TrendingDown className="w-5 h-5" style={{ color: '#ef4444' }} />
+              </div>
+              <div>
+                <p className="theme-text-secondary text-xs font-medium mb-1">
+                  Total Expenses {filterMonth !== 'all' ? `· ${getMonthLabel(filterMonth)}` : ''}
+                </p>
+                <p className="text-xl font-bold" style={{ color: '#ef4444' }}>-{formatCurrency(totalExpenses)}</p>
+              </div>
+            </div>
+
+            {/* Net Balance */}
+            <div className="card-glass rounded-2xl p-5 flex items-center gap-4" style={{ borderLeft: `3px solid ${netBalance >= 0 ? '#8151d9' : '#f59e0b'}` }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: netBalance >= 0 ? 'rgba(129, 81, 217, 0.15)' : 'rgba(245, 158, 11, 0.15)' }}>
+                <Wallet className="w-5 h-5" style={{ color: netBalance >= 0 ? '#8151d9' : '#f59e0b' }} />
+              </div>
+              <div>
+                <p className="theme-text-secondary text-xs font-medium mb-1">Net Balance</p>
+                <p className="text-xl font-bold" style={{ color: netBalance >= 0 ? '#8151d9' : '#f59e0b' }}>
+                  {netBalance >= 0 ? '+' : ''}{formatCurrency(netBalance)}
+                </p>
+              </div>
+            </div>
+
+            {/* Total Savings */}
+            <div className="card-glass rounded-2xl p-5 flex items-center gap-4" style={{ borderLeft: '3px solid #06b6d4' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(6, 182, 212, 0.15)' }}>
+                <PiggyBank className="w-5 h-5" style={{ color: '#06b6d4' }} />
+              </div>
+              <div>
+                <p className="theme-text-secondary text-xs font-medium mb-1">Total Savings</p>
+                <p className="text-xl font-bold" style={{ color: '#06b6d4' }}>+{formatCurrency(totalSavings)}</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Table */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="card-glass rounded-2xl p-6 mb-6"
+            className="card-glass rounded-2xl p-6"
           >
-            <div className="flex flex-col gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 theme-text-secondary" />
+            {/* Table Header: Title + Search + Filters in one row */}
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <h3 className="text-xl font-semibold theme-text">
+                {processedTransactions.length} Transaction{processedTransactions.length !== 1 ? 's' : ''}
+                {filterMonth !== 'all' && ` in ${getMonthLabel(filterMonth)}`}
+              </h3>
+
+              {/* Search — right after title */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 theme-text-secondary" />
                 <input
                   type="text"
-                  placeholder="Search transactions..."
+                  placeholder="Search category or note..."
                   value={searchTerm}
                   onChange={(e) => handleFilterChange(setSearchTerm)(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border theme-input"
+                  className="w-64 pl-9 pr-4 py-1.5 text-sm rounded-lg border theme-input"
                 />
               </div>
 
-              <div className="flex flex-wrap gap-4">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleFilterChange(setFilterType)('all')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      filterType === 'all' ? 'bg-purple-500/20 text-purple-500' : 'theme-text-secondary hover:theme-text'
-                    }`}
-                  >
-                    All
-                  </button>
-                  <button
-                    onClick={() => handleFilterChange(setFilterType)('income')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      filterType === 'income' ? 'bg-green-500/20 text-green-500' : 'theme-text-secondary hover:theme-text'
-                    }`}
-                  >
-                    Income
-                  </button>
-                  <button
-                    onClick={() => handleFilterChange(setFilterType)('expense')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      filterType === 'expense' ? 'bg-red-500/20 text-red-500' : 'theme-text-secondary hover:theme-text'
-                    }`}
-                  >
-                    Expenses
-                  </button>
-                </div>
+              {/* Divider */}
+              <div className="w-px h-5" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }} />
 
-                <div className="flex-1 min-w-[200px]">
-                  <select
-                    value={filterMonth}
-                    onChange={(e) => handleFilterChange(setFilterMonth)(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border theme-input"
+              {/* Type Filter */}
+              <div className="flex gap-1">
+                {(['all', 'income', 'expense'] as const).map(type => (
+                  <button
+                    key={type}
+                    onClick={() => handleFilterChange(setFilterType)(type)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize cursor-pointer ${
+                      filterType === type
+                        ? type === 'all' ? 'bg-purple-500/20 text-purple-500'
+                        : type === 'income' ? 'bg-green-500/20 text-green-500'
+                        : 'bg-red-500/20 text-red-500'
+                        : 'theme-text-secondary hover:theme-text'
+                    }`}
                   >
-                    <option value="all">All Months</option>
-                    {availableMonths.map((month) => (
-                      <option key={month} value={month}>
-                        {getMonthLabel(month)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    {type === 'all' ? 'All' : type === 'income' ? 'Income' : 'Expenses'}
+                  </button>
+                ))}
               </div>
-            </div>
-          </motion.div>
 
-          {/* Table section remains mostly the same, ensuring it uses formatted state */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="card-glass rounded-2xl p-6"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold theme-text">
-                {filteredTransactions.length} Transaction{filteredTransactions.length !== 1 ? 's' : ''}
-                {filterMonth !== 'all' && ` in ${getMonthLabel(filterMonth)}`}
-              </h3>
+              {/* Month Filter */}
+              <select
+                value={filterMonth}
+                onChange={(e) => handleFilterChange(setFilterMonth)(e.target.value)}
+                className="w-40 px-3 py-1.5 text-sm rounded-lg border theme-input
+                          bg-white text-gray-900 border-gray-200
+                          dark:bg-slate-900 dark:text-white dark:border-white/10
+                          focus:outline-none transition-colors cursor-pointer"
+                style={{ colorScheme: 'inherit' }}
+              >
+                <option value="all" className="bg-white text-gray-900 dark:bg-[#1a1a1a] dark:text-white">
+                  All Months
+                </option>
+                {availableMonths.map((month) => (
+                  <option
+                    key={month}
+                    value={month}
+                    className="bg-white text-gray-900 dark:bg-[#1a1a1a] dark:text-white"
+                  >
+                    {getMonthLabel(month)}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {filteredTransactions.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="theme-text-secondary">No transactions found</p>
+            {processedTransactions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(129, 81, 217, 0.1)' }}>
+                  <Search className="w-8 h-8" style={{ color: '#8151d9' }} />
+                </div>
+                <p className="theme-text font-medium mb-1">No transactions found</p>
+                <p className="theme-text-secondary text-sm">Try adjusting your filters or search term</p>
               </div>
             ) : (
               <>
@@ -231,196 +326,105 @@ const AllTransactions = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b theme-border">
-                        <th className="text-left py-3 px-4 theme-text-secondary font-medium text-sm">Date & Time</th>
+                        <th className="text-left py-3 px-4 theme-text-secondary font-medium text-sm">Date</th>
                         <th className="text-left py-3 px-4 theme-text-secondary font-medium text-sm">Category</th>
                         <th className="text-left py-3 px-4 theme-text-secondary font-medium text-sm">Note</th>
                         <th className="text-right py-3 px-4 theme-text-secondary font-medium text-sm">Amount</th>
                         <th className="text-center py-3 px-4 theme-text-secondary font-medium text-sm">Type</th>
-                        <th className="text-right py-3 px-4 theme-text-secondary font-medium text-sm">Actions</th> 
+                        <th className="text-right py-3 px-4 theme-text-secondary font-medium text-sm">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {paginatedTransactions.map((transaction, index) => (
-                        <motion.tr
-                          key={transaction.id || index}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: index * 0.02 }}
-                          className="border-b theme-border-light hover:bg-white/5 transition-colors"
-                        >
-                          <td className="py-4 px-4 theme-text-secondary text-sm">
-                            <div className="font-medium">
-                              {new Date(transaction.date).toLocaleDateString('en-PH', { 
-                                month: 'short', day: 'numeric', year: 'numeric' 
-                              })}
-                            </div>
-                          </td>
-                          <td className="py-4 px-4">
-                            <span className="theme-text font-medium">{transaction.category}</span>
-                          </td>
-                          <td className="py-4 px-4 theme-text-secondary text-sm">
-                            {transaction.note || '-'}
-                          </td>
-                          <td className="py-4 px-4 text-right">
-                            <span 
-                              className="font-semibold"
-                              style={{ color: transaction.type === 'expense' ? '#ef4444' : '#10b981' }}
-                            >
-                              {transaction.type === 'expense' ? '-' : '+'}{formatCurrency(transaction.amount)}
-                            </span>
-                          </td>
-                          <td className="py-4 px-4 text-center">
-                            <Badge className={transaction.type === 'expense' ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}>
-                              {transaction.type === 'expense' ? 'Expense' : 'Income'}
-                            </Badge>
-                          </td>
+                      {paginatedTransactions.reduce((acc, transaction, index) => {
+                        const transDate = new Date(transaction.date);
+                        const monthYear = `${transDate.getFullYear()}-${String(transDate.getMonth() + 1).padStart(2, '0')}`;
+                        const prevTx = paginatedTransactions[index - 1];
+                        const prevMonthYear = prevTx
+                          ? (() => { const d = new Date(prevTx.date); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; })()
+                          : null;
 
-                          <td className="py-4 px-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <button
-                                onClick={() => handleEditClick(transaction)}
-                                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-                              >
-                                <Pencil className="w-4 h-4 theme-text-secondary" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(transaction)}
-                                className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4 text-red-500" />
-                              </button>
-                            </div>
-                          </td>
-                        </motion.tr>
-                      ))}
+                        if (monthYear !== prevMonthYear) {
+                          acc.push(
+                            <tr key={`month-${monthYear}`}>
+                              <td colSpan={6} className="pt-6 pb-2 px-4">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#8151d9' }}>
+                                    {getMonthLabel(monthYear)}
+                                  </span>
+                                  <div className="flex-1 h-px" style={{ backgroundColor: 'rgba(129, 81, 217, 0.2)' }} />
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        acc.push(
+                          <motion.tr
+                            key={transaction.id || index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.02 }}
+                            className="border-b theme-border-light hover:bg-white/5 transition-colors"
+                          >
+                            <td className="py-4 px-4 theme-text-secondary text-sm">
+                              {new Date(transaction.date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className="theme-text font-medium">{transaction.category}</span>
+                            </td>
+                            <td className="py-4 px-4 theme-text-secondary text-sm">{transaction.note || '-'}</td>
+                            <td className="py-4 px-4 text-right">
+                              <span className="font-semibold" style={{ color: transaction.type === 'expense' ? '#ef4444' : '#10b981' }}>
+                                {transaction.type === 'expense' ? '-' : '+'}{formatCurrency(transaction.amount)}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4 text-center">
+                              <Badge className={transaction.type === 'expense' ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}>
+                                {transaction.type === 'expense' ? 'Expense' : 'Income'}
+                              </Badge>
+                            </td>
+                            <td className="py-4 px-4 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                <button onClick={() => handleEditClick(transaction)} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                                  <Pencil className="w-4 h-4 theme-text-secondary" />
+                                </button>
+                                <button onClick={() => handleDelete(transaction)} className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer">
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </button>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        );
+
+                        return acc;
+                      }, [] as React.ReactNode[])}
                     </tbody>
                   </table>
                 </div>
 
-                {/* Pagination Controls */}
+                {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-6 pt-6 border-t theme-border">
-                    <div className="theme-text-secondary text-sm">
-                      Showing {startIndex + 1} to {Math.min(endIndex, filteredTransactions.length)} of {filteredTransactions.length}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="p-2 theme-border rounded-lg disabled:opacity-50"
-                      >
-                        <ChevronLeft />
-                      </button>
-                      <button 
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                        disabled={currentPage === totalPages}
-                        className="p-2 theme-border rounded-lg disabled:opacity-50"
-                      >
-                        <ChevronRight />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* --- EDIT TRANSACTION MODAL --- */}
-                {editingTx && (
-                  <div 
-                    className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
-                    onClick={() => setEditingTx(null)}
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="w-full max-w-md rounded-2xl p-6"
-                      style={{
-                        background: 'rgba(20, 20, 20, 0.98)',
-                        backdropFilter: 'blur(24px)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)'
-                      }}
-                      onClick={(e) => e.stopPropagation()}
+                  <div className="flex items-center justify-center mt-6 pt-6 border-t theme-border gap-3">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="p-1.5 border theme-border rounded-lg disabled:opacity-50 cursor-pointer"
                     >
-                      <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold text-white">Edit Transaction</h3>
-                        <span 
-                          className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded"
-                          style={{ 
-                            backgroundColor: editForm.type === 'income' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                            color: editForm.type === 'income' ? '#10b981' : '#ef4444'
-                          }}
-                        >
-                          {editForm.type}
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-gray-300 text-sm font-medium mb-2 block">Amount (₱)</label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={editForm.amount}
-                            onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all text-lg"
-                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-gray-300 text-sm font-medium mb-2 block">Category</label>
-                            <select
-                              value={editForm.category}
-                              onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                              className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all cursor-pointer"
-                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                            >
-                              {(editForm.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((cat) => (
-                                <option key={cat} value={cat} style={{ backgroundColor: '#1a1a1a' }}>{cat}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <label className="text-gray-300 text-sm font-medium mb-2 block">Date</label>
-                            <input
-                              type="date"
-                              value={editForm.date}
-                              onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                              className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
-                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="text-gray-300 text-sm font-medium mb-2 block">Note (Optional)</label>
-                          <input
-                            type="text"
-                            value={editForm.note}
-                            onChange={(e) => setEditForm({ ...editForm, note: e.target.value })}
-                            className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
-                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                          />
-                        </div>
-
-                        <div className="flex gap-3 pt-4">
-                          <button
-                            onClick={() => setEditingTx(null)}
-                            className="flex-1 px-4 py-3 rounded-lg border font-medium transition-colors hover:bg-white/5"
-                            style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: '#9ca3af' }}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={handleSaveEdit}
-                            className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90"
-                            style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
-                          >
-                            Save Changes
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <span className="theme-text-secondary text-sm">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="p-1.5 border theme-border rounded-lg disabled:opacity-50 cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                    <span className="theme-text-secondary text-sm ml-2">
+                      Showing {startIndex + 1}–{Math.min(endIndex, processedTransactions.length)} of {processedTransactions.length}
+                    </span>
                   </div>
                 )}
               </>
@@ -428,6 +432,56 @@ const AllTransactions = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* Edit Modal */}
+      {editingTx && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }} onClick={() => setEditingTx(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md rounded-2xl p-6"
+            style={{ background: 'rgba(20, 20, 20, 0.98)', backdropFilter: 'blur(24px)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white">Edit Transaction</h3>
+              <span className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded" style={{ backgroundColor: editForm.type === 'income' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: editForm.type === 'income' ? '#10b981' : '#ef4444' }}>
+                {editForm.type}
+              </span>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-gray-300 text-sm font-medium mb-2 block">Amount (₱)</label>
+                <input type="number" step="0.01" value={editForm.amount} onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })} className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all text-lg" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-gray-300 text-sm font-medium mb-2 block">Category</label>
+                  <select value={editForm.category} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}>
+                    {(editForm.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((cat) => (
+                      <option key={cat} value={cat} style={{ backgroundColor: '#1a1a1a' }}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-gray-300 text-sm font-medium mb-2 block">Date</label>
+                  <input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }} />
+                </div>
+              </div>
+              <div>
+                <label className="text-gray-300 text-sm font-medium mb-2 block">Note (Optional)</label>
+                <input type="text" value={editForm.note} onChange={(e) => setEditForm({ ...editForm, note: e.target.value })} className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button onClick={() => setEditingTx(null)} className="flex-1 px-4 py-3 rounded-lg border font-medium transition-colors hover:bg-white/5 cursor-pointer" style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: '#9ca3af' }}>Cancel</button>
+                <button onClick={handleSaveEdit} className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90 cursor-pointer" style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}>Save Changes</button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      <MiniCalculator buttonBottom="bottom-8" panelBottom="bottom-28" />
     </div>
   );
 };

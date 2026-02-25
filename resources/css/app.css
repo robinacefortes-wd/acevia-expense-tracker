@@ -1,10 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
+@import './dashboard.css';
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 @custom-variant dark (&:is(.dark *));
+
+@layer base {
+  *, *::before, *::after {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  [data-theme="light"] *, 
+  [data-theme="light"] *::before, 
+  [data-theme="light"] *::after {
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+}
 
 @theme {
     --color-accent-primary: #8151d9;
@@ -23,35 +37,57 @@ html {
 }
 
 :root {
-    /* --- Dark Theme Design System --- */
+    /* Dashboard theme variables */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #141414;
+    --text-primary: #ffffff;
+    --text-secondary: #9ca3af;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-color-light: rgba(255, 255, 255, 0.05);
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --input-border: rgba(255, 255, 255, 0.1);
+
+    /* App-wide variables (used by body, scrollbar, etc.) */
     --background: #141414;
     --foreground: #ffffff;
-    
     --card: #1a1a1a;
     --card-foreground: #ffffff;
-
-    /* --- CTA BG Color --- */
     --bg-section: rgba(255, 255, 255, 0.02);
-    
     --primary: #8151d9;
     --primary-foreground: #ffffff;
-    
     --accent: #8151d9;
     --accent-foreground: #ffffff;
-
     --border: rgba(255, 255, 255, 0.1);
     --radius: 0.625rem;
-
-    /* Extra variables for component-specific styles */
     --bg-page: #141414;
     --bg-card: #1a1a1a;
-    --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.7);
-    --text-muted: rgba(255, 255, 255, 0.5);
     --accent-primary: #8151d9;
     --accent-strong: #6a3ec4;
 }
 
+[data-theme="light"] {
+    /* Dashboard theme variables */
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6b7280;
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-color-light: rgba(0, 0, 0, 0.05);
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --input-bg: rgba(0, 0, 0, 0.02);
+    --input-border: rgba(0, 0, 0, 0.1);
+
+    /* App-wide variables */
+    --background: #f8f9fa;
+    --foreground: #1a1a1a;
+    --card: #ffffff;
+    --card-foreground: #1a1a1a;
+    --bg-section: rgba(0, 0, 0, 0.02);
+    --border: rgba(0, 0, 0, 0.1);
+    --bg-page: #f8f9fa;
+    --bg-card: #ffffff;
+}
 /* --- Global Styles --- */
 body {
     background-color: var(--background);
@@ -69,17 +105,16 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(129, 81, 217, 0.3);
     border-radius: 5px;
-    border: 2px solid var(--background); /* Creates a "floating" effect */
+    border: 2px solid var(--background);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(129, 81, 217, 0.5);
 }
 
-/* Support for Firefox scrollbars */
 * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) var(--background);
+    scrollbar-color: rgba(129, 81, 217, 0.3) var(--background);
 }

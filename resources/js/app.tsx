@@ -3,7 +3,6 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
-import { initializeTheme } from './hooks/use-appearance';
 
 // 1. Import your new Context files
 import { ThemeProvider } from '@/components/dashboard/ThemeContext';
@@ -37,5 +36,3 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
-
-initializeTheme();

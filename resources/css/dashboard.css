@@ -2,9 +2,6 @@
    Dashboard Theme Styles
    ============================================ */
 
-/* Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
 /* ============================================
    DEFAULT Theme Variables (Dark)
    ============================================ */
@@ -18,6 +15,15 @@
   --card-bg: rgba(255, 255, 255, 0.03);
   --input-bg: rgba(255, 255, 255, 0.05);
   --input-border: rgba(255, 255, 255, 0.1);
+}
+
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(129, 81, 217, 0.6);
+  outline-offset: 2px;
 }
 
 /* ============================================
@@ -158,3 +164,4 @@ input[type='number']::-webkit-outer-spin-button {
 input[type='number'] {
   -moz-appearance: textfield;
 }
+

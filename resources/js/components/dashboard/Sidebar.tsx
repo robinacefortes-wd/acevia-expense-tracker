@@ -1,30 +1,36 @@
-import { useState } from 'react';
+import { Link, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { Link } from '@inertiajs/react';
-import { LayoutDashboard, Receipt, Sun, Moon, LogOut, LucideIcon } from 'lucide-react';
+import type { LucideIcon} from 'lucide-react';
+import { LayoutDashboard, Banknote, Sun, Moon, LogOut, BarChart2, UserCircle } from 'lucide-react';
+import { useState } from 'react';
 import { useTheme } from '@/components/dashboard/ThemeContext';
-
-declare const route: any;
+import type { SharedData } from '@/types/index';
 
 interface MenuItem {
   icon: LucideIcon;
   label: string;
-  active: boolean;
+  href: string;
 }
 
 const menuItems: MenuItem[] = [
-  { icon: LayoutDashboard, label: 'Dashboard', active: true },
-  { icon: Receipt, label: 'Records', active: false },
+  { icon: LayoutDashboard, label: 'Dashboard',  href: '/dashboard'    },
+  { icon: Banknote,        label: 'Records',    href: '/transactions' },
+  { icon: BarChart2,       label: 'Analytics',  href: '/analytics'    },
+  { icon: UserCircle,      label: 'Profile',    href: '/profile'      },
 ];
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const isActive = (label: string) => {
-    if (label === 'Dashboard') return window.location.pathname === '/dashboard';
-    if (label === 'Transactions') return window.location.pathname === '/transactions';
-    return false;
-  };
   const { theme, toggleTheme } = useTheme();
+  const { auth } = usePage<SharedData>().props;
+  const user = auth.user;
+
+  const firstName = user?.first_name ?? '';
+  const lastName = user?.last_name ?? '';
+  const fullName = `${firstName} ${lastName}`.trim();
+  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+
+  const isActive = (href: string) => window.location.pathname === href;
 
   return (
     <motion.aside
@@ -35,59 +41,71 @@ const Sidebar = () => {
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
       className="relative flex-shrink-0 border-r theme-sidebar"
-      style={{ 
-        position: 'fixed',
-        height: '100vh',
-        zIndex: 40
-      }}
+      style={{ position: 'fixed', height: '100vh', zIndex: 40 }}
     >
       <div className="flex flex-col h-full py-6">
-        {/* Logo */}
+
+        {/* User Avatar + Name */}
         <div className="px-4 mb-8">
-          <motion.div 
-            className="flex items-center gap-3"
-            initial={false}
-          >
-            <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: '#8151d9' }}
-            >
-              <span className="text-white font-bold text-xl">A</span>
-            </div>
+          <motion.div className="flex items-center gap-3" initial={false}>
+            {/* Avatar */}
+            {user?.avatar ? (
+                <img
+                    src={`/storage/${user.avatar}`}   // ← add /storage/ prefix
+                    alt={fullName}
+                    className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                />
+            ) : (
+                <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
+                    style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
+                >
+                    {initials}
+                </div>
+            )}
+
+            {/* Name — only visible when expanded */}
             {isExpanded && (
-              <motion.span
+              <motion.div
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.2 }}
-                className="theme-text font-semibold text-lg whitespace-nowrap overflow-hidden"
+                className="overflow-hidden"
               >
-                Acevia
-              </motion.span>
+                <p className="theme-text font-semibold text-sm whitespace-nowrap leading-tight">
+                  {fullName || 'User'}
+                </p>
+                <p className="theme-text-secondary text-xs whitespace-nowrap truncate max-w-[140px]">
+                  {user?.email ?? ''}
+                </p>
+              </motion.div>
             )}
           </motion.div>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 px-3">
-          {menuItems.map((item, index) => (
-            <Link 
-              key={index} 
-              href={item.label === 'Dashboard' ? '/dashboard' : '/transactions'}
-              className="block w-full"
-            >
+          {menuItems.map((item) => (
+            <Link key={item.href} href={item.href} className="block w-full">
               <motion.div
                 whileHover={{ x: 4 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl mb-2 transition-colors theme-nav-item"
+                className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl mb-2 transition-colors theme-nav-item cursor-pointer"
                 style={{
-                  backgroundColor: isActive(item.label) ? 'rgba(129, 81, 217, 0.15)' : 'transparent',
-                  color: isActive(item.label) ? '#8151d9' : undefined
+                  backgroundColor: isActive(item.href) ? 'rgba(129, 81, 217, 0.15)' : 'transparent',
+                  color: isActive(item.href) ? '#8151d9' : undefined,
                 }}
               >
                 <item.icon className="w-6 h-6 flex-shrink-0" />
                 {isExpanded && (
-                  <motion.span className="font-medium whitespace-nowrap overflow-hidden">
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="font-medium whitespace-nowrap overflow-hidden"
+                  >
                     {item.label}
                   </motion.span>
                 )}
@@ -96,21 +114,21 @@ const Sidebar = () => {
           ))}
         </nav>
 
-        {/* Bottom Actions Section */}
+        {/* Bottom Actions */}
         <div className="px-3 mt-auto flex flex-col gap-2">
+
           {/* Theme Toggle */}
           <motion.button
             data-testid="theme-toggle"
             onClick={toggleTheme}
             whileHover={{ x: 4 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl transition-colors theme-nav-item"
+            className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl transition-colors theme-nav-item cursor-pointer"
           >
-            {theme === 'dark' ? (
-              <Sun className="w-6 h-6 flex-shrink-0" />
-            ) : (
-              <Moon className="w-6 h-6 flex-shrink-0" />
-            )}
+            {theme === 'dark'
+              ? <Sun className="w-6 h-6 flex-shrink-0" />
+              : <Moon className="w-6 h-6 flex-shrink-0" />
+            }
             {isExpanded && (
               <motion.span
                 initial={{ opacity: 0, width: 0 }}
@@ -125,15 +143,10 @@ const Sidebar = () => {
           </motion.button>
 
           {/* Divider */}
-          <div className="mx-4 my-4 border-t border-gray-200 dark:border-gray-800 opacity-50" />
+          <div className="mx-4 my-1 border-t border-gray-200 dark:border-gray-800 opacity-50" />
 
-          {/* Logout Button */}
-          <Link
-            href="/logout" 
-            method="post"
-            as="button"
-            className="w-full text-left"
-          >
+          {/* Logout */}
+          <Link href="/logout" method="post" as="button" className="w-full text-left cursor-pointer">
             <motion.div
               whileHover={{ x: 4 }}
               whileTap={{ scale: 0.98 }}
@@ -147,6 +160,7 @@ const Sidebar = () => {
               )}
             </motion.div>
           </Link>
+
         </div>
       </div>
     </motion.aside>

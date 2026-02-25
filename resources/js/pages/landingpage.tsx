@@ -1,10 +1,10 @@
-import React from 'react';
 import { Head } from '@inertiajs/react';
-import Navbar from '@/components/landing page/Navbar';
-import Hero from '@/components/landing page/Hero';
-import Features from '@/components/landing page/features'; 
+import React from 'react';
 import CTA from '@/components/landing page/CTA';
+import Features from '@/components/landing page/features'; 
 import Footer from '@/components/landing page/footer';     
+import Hero from '@/components/landing page/Hero';
+import Navbar from '@/components/landing page/Navbar';
 
 export default function LandingPage() {
     return (
