@@ -32,12 +32,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Analytics Page
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 
-    // Profile Management
+    // Profile Management (renamed to avoid conflict with settings/profile routes)
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
-    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.info.update');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
-    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
-    Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.info.password');
+    Route::post('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.info.destroy');
 
     // Financial Actions
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');

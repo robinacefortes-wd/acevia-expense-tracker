@@ -3,6 +3,8 @@
 use App\Models\User;
 
 test('profile page is displayed', function () {
+    $this->withoutVite();
+
     $user = User::factory()->create();
 
     $response = $this
@@ -17,7 +19,7 @@ test('profile information can be updated', function () {
 
     $response = $this
         ->actingAs($user)
-        ->patch(route('profile.update'), [
+        ->patch('/settings/profile', [
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
@@ -38,7 +40,7 @@ test('email verification status is unchanged when the email address is unchanged
 
     $response = $this
         ->actingAs($user)
-        ->patch(route('profile.update'), [
+        ->patch('/settings/profile', [
             'name' => 'Test User',
             'email' => $user->email,
         ]);
@@ -55,7 +57,7 @@ test('user can delete their account', function () {
 
     $response = $this
         ->actingAs($user)
-        ->delete(route('profile.destroy'), [
+        ->delete('/settings/profile', [
             'password' => 'password',
         ]);
 
@@ -73,7 +75,7 @@ test('correct password must be provided to delete account', function () {
     $response = $this
         ->actingAs($user)
         ->from(route('profile.edit'))
-        ->delete(route('profile.destroy'), [
+        ->delete('/settings/profile', [
             'password' => 'wrong-password',
         ]);
 
