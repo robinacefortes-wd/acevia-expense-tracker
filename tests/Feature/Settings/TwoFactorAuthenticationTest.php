@@ -9,6 +9,8 @@ test('two factor settings page can be rendered', function () {
         $this->markTestSkipped('Two-factor authentication is not enabled.');
     }
 
+    $this->withoutVite();
+
     Features::twoFactorAuthentication([
         'confirm' => true,
         'confirmPassword' => true,
@@ -48,6 +50,8 @@ test('two factor settings page does not requires password confirmation when disa
         $this->markTestSkipped('Two-factor authentication is not enabled.');
     }
 
+    $this->withoutVite();
+
     $user = User::factory()->create();
 
     Features::twoFactorAuthentication([
@@ -67,6 +71,8 @@ test('two factor settings page returns forbidden response when two factor is dis
     if (! Features::canManageTwoFactorAuthentication()) {
         $this->markTestSkipped('Two-factor authentication is not enabled.');
     }
+
+    $this->withoutVite();
 
     config(['fortify.features' => []]);
 
