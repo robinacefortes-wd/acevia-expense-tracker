@@ -5,6 +5,8 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
 
 test('reset password link screen can be rendered', function () {
+    $this->withoutVite();
+
     $response = $this->get(route('password.request'));
 
     $response->assertOk();
@@ -21,6 +23,8 @@ test('reset password link can be requested', function () {
 });
 
 test('reset password screen can be rendered', function () {
+    $this->withoutVite();
+
     Notification::fake();
 
     $user = User::factory()->create();

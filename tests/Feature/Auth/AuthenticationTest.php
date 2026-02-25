@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Fortify\Features;
 
 test('login screen can be rendered', function () {
+    $this->withoutVite();
+
     $response = $this->get(route('login'));
 
     $response->assertOk();

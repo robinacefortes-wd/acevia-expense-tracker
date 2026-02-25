@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 
 test('email verification screen can be rendered', function () {
+    $this->withoutVite();
+
     $user = User::factory()->unverified()->create();
 
     $response = $this->actingAs($user)->get(route('verification.notice'));
