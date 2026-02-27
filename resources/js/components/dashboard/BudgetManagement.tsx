@@ -4,6 +4,7 @@ import { UtensilsCrossed, Car, Gamepad2, ShoppingBag, Heart, MoreHorizontal, Pen
 import { useState } from 'react';
 import type { Transaction, Budget } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
+import DeleteConfirmModal from '@/components/dashboard/DeleteConfirmModal';
 
 interface BudgetManagementProps {
   transactions: Transaction[];
@@ -45,6 +46,7 @@ const COLORS: Record<string, string> = {
 const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget }: BudgetManagementProps) => {
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [editForm, setEditForm] = useState<EditForm>({ category: '', limit: '', period: 'month' });
+  const [deletingBudget, setDeletingBudget] = useState<Budget | null>(null);
 
   const calculateSpent = (category: string): number => {
     return transactions
@@ -72,14 +74,21 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
   };
 
   const handleSaveEdit = (): void => {
-      if (editingBudget && editForm.limit && parseFloat(editForm.limit) > 0) {
-          onEditBudget({
-              ...editingBudget, 
-              limit: parseFloat(editForm.limit),
-              period: editForm.period
-          });
-          setEditingBudget(null); 
-      }
+    if (editingBudget && editForm.limit && parseFloat(editForm.limit) > 0) {
+      onEditBudget({
+        ...editingBudget,
+        limit: parseFloat(editForm.limit),
+        period: editForm.period
+      });
+      setEditingBudget(null);
+    }
+  };
+
+  const handleDeleteConfirm = (): void => {
+    if (deletingBudget) {
+      onDeleteBudget(deletingBudget);
+      setDeletingBudget(null);
+    }
   };
 
   const periodLabels: Record<string, string> = {
@@ -100,12 +109,12 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
         style={{ minHeight: '500px' }}
       >
         <h3 className="text-xl font-semibold theme-text mb-6">Budget Management</h3>
-        
+
         {budgetList.length === 0 ? (
           <div className="flex flex-col items-center justify-center" style={{ height: '280px' }}>
-            <div 
+            <div
               className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
-              style={{ 
+              style={{
                 background: 'linear-gradient(135deg, rgba(129, 81, 217, 0.2) 0%, rgba(161, 120, 232, 0.2) 100%)',
               }}
             >
@@ -121,7 +130,7 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
             {budgetList.map((budget, index) => {
               const percentage = (budget.spent / budget.limit) * 100;
               const isOverBudget = percentage > 100;
-              
+
               return (
                 <motion.div
                   key={index}
@@ -132,7 +141,7 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div 
+                      <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center"
                         style={{ backgroundColor: `${budget.color}20` }}
                       >
@@ -146,7 +155,7 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span 
+                      <span
                         className="text-sm font-semibold"
                         style={{ color: isOverBudget ? '#ef4444' : budget.color }}
                       >
@@ -160,21 +169,21 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
                         <Pencil className="w-4 h-4 theme-text-secondary" />
                       </button>
                       <button
-                        onClick={() => onDeleteBudget(budget)} 
+                        onClick={() => setDeletingBudget(budget)}
                         className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-4 h-4 text-red-500" />
                       </button>
                     </div>
                   </div>
-                  
+
                   <div className="relative w-full h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${Math.min(percentage, 100)}%` }}
                       transition={{ duration: 1, delay: 0.7 + index * 0.1 }}
                       className="h-full rounded-full"
-                      style={{ 
+                      style={{
                         backgroundColor: isOverBudget ? '#ef4444' : budget.color,
                         boxShadow: `0 0 10px ${isOverBudget ? '#ef4444' : budget.color}50`
                       }}
@@ -186,7 +195,6 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
           </div>
         )}
 
-        {/* Budget Summary */}
         {budgetList.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -196,15 +204,11 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
           >
             <div className="flex items-center justify-between">
               <span className="theme-text-secondary text-sm">Total Budgeted</span>
-              <span className="theme-text font-semibold">
-                {formatCurrency(totalBudgeted)}
-              </span>
+              <span className="theme-text font-semibold">{formatCurrency(totalBudgeted)}</span>
             </div>
             <div className="flex items-center justify-between mt-2">
               <span className="theme-text-secondary text-sm">Total Spent</span>
-              <span className="theme-text font-semibold">
-                {formatCurrency(totalSpent)}
-              </span>
+              <span className="theme-text font-semibold">{formatCurrency(totalSpent)}</span>
             </div>
           </motion.div>
         )}
@@ -212,7 +216,7 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
 
       {/* Edit Budget Modal */}
       {editingBudget && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
           onClick={() => setEditingBudget(null)}
@@ -231,58 +235,43 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
             <h3 className="text-xl font-bold text-white mb-4">Edit Budget: {editForm.category}</h3>
             <div className="space-y-4">
               <div>
-                <label className="text-gray-300 text-sm font-medium mb-2 block">
-                  Budget Period
-                </label>
+                <label className="text-gray-300 text-sm font-medium mb-2 block">Budget Period</label>
                 <select
                   value={editForm.period}
                   onChange={(e) => setEditForm({ ...editForm, period: e.target.value as 'today' | 'week' | 'month' | 'year' })}
-                  className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderColor: 'rgba(255, 255, 255, 0.1)'
-                  }}
+                  className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}
                 >
                   <option value="today" style={{ backgroundColor: '#1a1a1a' }}>Today</option>
-                  <option value="week" style={{ backgroundColor: '#1a1a1a' }}>This Week</option>
+                  <option value="week"  style={{ backgroundColor: '#1a1a1a' }}>This Week</option>
                   <option value="month" style={{ backgroundColor: '#1a1a1a' }}>This Month</option>
-                  <option value="year" style={{ backgroundColor: '#1a1a1a' }}>This Year</option>
+                  <option value="year"  style={{ backgroundColor: '#1a1a1a' }}>This Year</option>
                 </select>
               </div>
               <div>
-                <label className="text-gray-300 text-sm font-medium mb-2 block">
-                  Budget Limit (₱)
-                </label>
+                <label className="text-gray-300 text-sm font-medium mb-2 block">Budget Limit (₱)</label>
                 <input
                   type="number"
                   step="0.01"
                   value={editForm.limit}
                   onChange={(e) => setEditForm({ ...editForm, limit: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all text-lg"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderColor: 'rgba(255, 255, 255, 0.1)'
-                  }}
+                  className="w-full px-4 py-3 rounded-lg border text-white placeholder:text-gray-500 focus:outline-none transition-all text-lg"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                   autoFocus
                 />
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => setEditingBudget(null)}
-                  className="flex-1 px-4 py-3 rounded-lg border font-medium transition-colors hover:bg-white/5"
-                  style={{
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    color: '#9ca3af'
-                  }}
+                  className="flex-1 px-4 py-3 rounded-lg border font-medium transition-colors hover:bg-white/5 cursor-pointer"
+                  style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: '#9ca3af' }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90"
-                  style={{
-                    background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)'
-                  }}
+                  className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90 cursor-pointer"
+                  style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
                 >
                   Save Changes
                 </button>
@@ -291,9 +280,17 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
           </motion.div>
         </div>
       )}
+
+      {/* Delete Confirm Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deletingBudget}
+        title="Delete Budget"
+        description={`Are you sure you want to delete the ${deletingBudget?.category} budget? This cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletingBudget(null)}
+      />
     </>
   );
 };
-
 
 export default BudgetManagement;

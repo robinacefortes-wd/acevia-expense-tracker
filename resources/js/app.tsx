@@ -4,8 +4,9 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '../css/app.css';
 
-// 1. Import your new Context files
 import { ThemeProvider } from '@/components/dashboard/ThemeContext';
+import { ToastProvider } from '@/components/dashboard/ToastContext';
+import ToastContainer from '@/components/dashboard/ToastContainer';
 import { StateProvider } from '@/context/StateContext';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -14,7 +15,7 @@ createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     resolve: (name) =>
         resolvePageComponent(
-            `./Pages/${name}.tsx`, 
+            `./Pages/${name}.tsx`,
             import.meta.glob('./Pages/**/*.tsx'),
         ),
     setup({ el, App, props }) {
@@ -22,12 +23,13 @@ createInertiaApp({
 
         root.render(
             <StrictMode>
-                {}
                 <ThemeProvider>
-                    <StateProvider>
-                        <App {...props} />
-                        {}
-                    </StateProvider>
+                    <ToastProvider>
+                        <StateProvider>
+                            <App {...props} />
+                            <ToastContainer />
+                        </StateProvider>
+                    </ToastProvider>
                 </ThemeProvider>
             </StrictMode>,
         );

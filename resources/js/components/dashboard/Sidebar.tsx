@@ -47,41 +47,45 @@ const Sidebar = () => {
 
         {/* User Avatar + Name */}
         <div className="px-4 mb-8">
-          <motion.div className="flex items-center gap-3" initial={false}>
-            {/* Avatar */}
-            {user?.avatar ? (
+          <Link href="/profile" className="block">
+            <motion.div
+              className="flex items-center gap-3 rounded-xl px-1 py-1 transition-colors theme-nav-item cursor-pointer"
+            >
+              {/* Avatar */}
+              {user?.avatar ? (
                 <img
-                    src={`/storage/${user.avatar}`}   // ← add /storage/ prefix
-                    alt={fullName}
-                    className="w-9 h-9 rounded-full object-cover flex-shrink-0"
+                  src={`/storage/${user.avatar}`}
+                  alt={fullName}
+                  className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                 />
-            ) : (
+              ) : (
                 <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
-                    style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
+                  className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
+                  style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
                 >
-                    {initials}
+                  {initials}
                 </div>
-            )}
+              )}
 
-            {/* Name — only visible when expanded */}
-            {isExpanded && (
-              <motion.div
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <p className="theme-text font-semibold text-sm whitespace-nowrap leading-tight">
-                  {fullName || 'User'}
-                </p>
-                <p className="theme-text-secondary text-xs whitespace-nowrap truncate max-w-[140px]">
-                  {user?.email ?? ''}
-                </p>
-              </motion.div>
-            )}
-          </motion.div>
+              {/* Name + Email */}
+              {isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: 'auto' }}
+                  exit={{ opacity: 0, width: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <p className="theme-text font-semibold text-sm whitespace-nowrap leading-tight">
+                    {fullName || 'User'}
+                  </p>
+                  <p className="theme-text-secondary text-xs whitespace-nowrap truncate max-w-[140px]">
+                    {user?.email ?? ''}
+                  </p>
+                </motion.div>
+              )}
+            </motion.div>
+          </Link>
         </div>
 
         {/* Navigation */}

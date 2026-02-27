@@ -161,7 +161,7 @@ const MiniCalculator = ({
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                className="p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4 text-gray-400" />
               </button>
@@ -175,7 +175,7 @@ const MiniCalculator = ({
               <div className="flex items-center justify-between">
                 <button
                   onClick={handleBackspace}
-                  className="p-1 rounded hover:bg-white/10 transition-colors"
+                  className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
                 >
                   <Delete className="w-4 h-4 text-gray-500" />
                 </button>
@@ -218,7 +218,7 @@ const MiniCalculator = ({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed ${buttonBottom} right-8 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50`}
+        className={`fixed ${buttonBottom} right-8 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50 cursor-pointer`}
         style={{
           background: isOpen
             ? 'linear-gradient(135deg, #a178e8 0%, #8151d9 100%)'
@@ -226,7 +226,7 @@ const MiniCalculator = ({
           border: '2px solid rgba(255,255,255,0.1)',
         }}
       >
-        <Calculator className="w-7 h-7 text-white cursor-pointer" />
+        <Calculator className="w-7 h-7 text-white" />
       </motion.button>
     </>
   );

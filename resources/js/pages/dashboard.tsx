@@ -11,6 +11,7 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import SmartTrackingChart from '@/components/dashboard/SmartTrackingChart';
 import SpendingCategories from '@/components/dashboard/SpendingCategories';
 import StatsCards from '@/components/dashboard/StatsCards';
+import { useToast } from '@/components/dashboard/ToastContext';
 
 import type { Transaction, Budget, SavingsData } from '@/types/index';
 
@@ -33,8 +34,8 @@ const Dashboard = ({
   budgets = [],
 }: DashboardProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const { showToast } = useToast();
 
-  // Sort transactions by date+time descending — done once, used everywhere
   const sortedTransactions = [...transactions].sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.time || '00:00:00'}`);
     const dateB = new Date(`${b.date}T${b.time || '00:00:00'}`);
@@ -53,30 +54,31 @@ const Dashboard = ({
       type: transactionData.type,
     }, {
       preserveScroll: true,
-      onSuccess: () => console.log("Transaction Updated!"),
+      onSuccess: () => showToast('Transaction updated successfully!'),
+      onError: () => showToast('Failed to update transaction.', 'error'),
     });
   };
 
   const handleDeleteTransaction = (transaction: Transaction) => {
-    if (confirm(`Delete transaction: ${transaction.category} - ${transaction.amount}?`)) {
-      router.post('/transactions/delete', {
-        id: transaction.id
-      }, {
-        preserveScroll: true,
-        onSuccess: () => console.log("Transaction removed")
-      });
-    }
+    router.post('/transactions/delete', {
+      id: transaction.id
+    }, {
+      preserveScroll: true,
+      onSuccess: () => showToast('Transaction deleted.'),
+      onError: () => showToast('Failed to delete transaction.', 'error'),
+    });
   };
 
   const handleEditSavings = (amount: number, date: string) => {
     router.post('/savings', {
-      amount: amount,
-      date: date,
+      amount,
+      date,
       note: 'Updated via Dashboard Stats',
       update_total: true,
     }, {
       preserveScroll: true,
-      onSuccess: () => console.log("Success!"),
+      onSuccess: () => showToast('Savings updated successfully!'),
+      onError: () => showToast('Failed to update savings.', 'error'),
     });
   };
 
@@ -87,19 +89,19 @@ const Dashboard = ({
       period: budgetData.period,
     }, {
       preserveScroll: true,
-      onSuccess: () => console.log("Budget Updated!"),
+      onSuccess: () => showToast('Budget updated successfully!'),
+      onError: () => showToast('Failed to update budget.', 'error'),
     });
   };
 
   const handleDeleteBudget = (budget: Budget) => {
-    if (confirm(`Are you sure you want to delete the ${budget.category} budget?`)) {
-      router.post('/budgets/delete', {
-        id: budget.id
-      }, {
-        preserveScroll: true,
-        onSuccess: () => console.log("Deleted successfully")
-      });
-    }
+    router.post('/budgets/delete', {
+      id: budget.id
+    }, {
+      preserveScroll: true,
+      onSuccess: () => showToast('Budget deleted.'),
+      onError: () => showToast('Failed to delete budget.', 'error'),
+    });
   };
 
   return (
@@ -108,11 +110,9 @@ const Dashboard = ({
       <div className="flex min-h-screen theme-bg">
         <Sidebar />
 
-        {/* Main Content */}
         <main className="flex-1 overflow-auto" style={{ marginLeft: '72px' }}>
           <div className="p-6 xl:p-8">
 
-            {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -123,14 +123,12 @@ const Dashboard = ({
               <p className="theme-text-secondary">Welcome back! Here's your financial overview.</p>
             </motion.div>
 
-            {/* Stats Cards */}
             <StatsCards
               transactions={sortedTransactions}
               savings={totalSavingsSum}
               onEditSavings={handleEditSavings}
             />
 
-            {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
               <div className="lg:col-span-2">
                 <SmartTrackingChart transactions={sortedTransactions} />
@@ -140,7 +138,6 @@ const Dashboard = ({
               </div>
             </div>
 
-            {/* Budget and Recent Transactions */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
               <div>
                 <BudgetManagement
@@ -161,24 +158,19 @@ const Dashboard = ({
           </div>
         </main>
 
-        {/* Quick Action Button */}
         <motion.button
           data-testid="quick-action-button"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsModalOpen(true)}
-          className="fixed bottom-8 right-8 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50 transition-transform"
-          style={{
-            background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)',
-          }}
+          className="fixed bottom-8 right-8 w-16 h-16 rounded-full flex items-center justify-center shadow-2xl z-50 transition-transform cursor-pointer"
+          style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
         >
           <Plus className="w-8 h-8 text-white" />
         </motion.button>
 
-        {/* Mini Calculator Modal */}
         <MiniCalculator />
 
-        {/* Quick Action Modal */}
         <QuickActionModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

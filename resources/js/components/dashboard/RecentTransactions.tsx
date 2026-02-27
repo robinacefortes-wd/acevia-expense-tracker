@@ -4,6 +4,7 @@ import { Receipt, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
+import DeleteConfirmModal from '@/components/dashboard/DeleteConfirmModal';
 import type { Transaction } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
 
@@ -23,7 +24,6 @@ const RecentTransactions = ({
 }: RecentTransactionsProps) => {
   const isEmpty = transactions.length === 0;
 
-  // --- MODAL STATE ---
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
   const [editForm, setEditForm] = useState({
     amount: '',
@@ -32,8 +32,8 @@ const RecentTransactions = ({
     note: '',
     type: 'expense'
   });
+  const [deletingTx, setDeletingTx] = useState<Transaction | null>(null);
 
-  // --- HANDLERS ---
   const handleEditClick = (tx: Transaction) => {
     setEditForm({
       amount: tx.amount.toString(),
@@ -59,6 +59,13 @@ const RecentTransactions = ({
     }
   };
 
+  const handleDeleteConfirm = () => {
+    if (deletingTx) {
+      onDeleteTransaction(deletingTx);
+      setDeletingTx(null);
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -71,13 +78,13 @@ const RecentTransactions = ({
       >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-semibold theme-text">Recent Transactions</h3>
-        <button
-          onClick={() => router.visit('/transactions')}
-          className="text-sm font-medium cursor-pointer"
-          style={{ color: '#8151d9' }}
-        >
-          View All
-        </button>
+          <button
+            onClick={() => router.visit('/transactions')}
+            className="text-sm font-medium cursor-pointer"
+            style={{ color: '#8151d9' }}
+          >
+            View All
+          </button>
         </div>
 
         {isEmpty ? (
@@ -133,9 +140,7 @@ const RecentTransactions = ({
                     <td className="py-4 px-4 text-right">
                       <span
                         className="font-semibold"
-                        style={{
-                          color: transaction.type === 'expense' ? '#ef4444' : '#10b981'
-                        }}
+                        style={{ color: transaction.type === 'expense' ? '#ef4444' : '#10b981' }}
                       >
                         {transaction.type === 'expense' ? '-' : '+'}{formatCurrency(transaction.amount)}
                       </span>
@@ -158,12 +163,12 @@ const RecentTransactions = ({
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEditClick(transaction)}
-                          className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                          className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
                         >
-                          <Pencil className="w-4 h-4 theme-text-secondary cursor-pointer" />
+                          <Pencil className="w-4 h-4 theme-text-secondary" />
                         </button>
                         <button
-                          onClick={() => onDeleteTransaction(transaction)}
+                          onClick={() => setDeletingTx(transaction)}
                           className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4 text-red-500" />
@@ -178,9 +183,9 @@ const RecentTransactions = ({
         )}
       </motion.div>
 
-      {/* --- EDIT TRANSACTION MODAL --- */}
+      {/* Edit Transaction Modal */}
       {editingTx && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.8)' }}
           onClick={() => setEditingTx(null)}
@@ -198,10 +203,9 @@ const RecentTransactions = ({
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-white">Edit Transaction</h3>
-              {/* Subtle indicator of type */}
-              <span 
+              <span
                 className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded"
-                style={{ 
+                style={{
                   backgroundColor: editForm.type === 'income' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                   color: editForm.type === 'income' ? '#10b981' : '#ef4444'
                 }}
@@ -209,22 +213,17 @@ const RecentTransactions = ({
                 {editForm.type}
               </span>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="text-gray-300 text-sm font-medium mb-2 block">
-                  Amount (₱)
-                </label>
+                <label className="text-gray-300 text-sm font-medium mb-2 block">Amount (₱)</label>
                 <input
                   type="number"
                   step="0.01"
                   value={editForm.amount}
                   onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all text-lg"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderColor: 'rgba(255, 255, 255, 0.1)'
-                  }}
+                  className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all text-lg"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                 />
               </div>
 
@@ -234,21 +233,14 @@ const RecentTransactions = ({
                   <select
                     value={editForm.category}
                     onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all cursor-pointer"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)'
-                    }}
+                    className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}
                   >
                     <option value="" disabled style={{ backgroundColor: '#1a1a1a', color: '#6b7280' }}>
                       Select category
                     </option>
-                    
-                    {/* DYNAMIC CATEGORY FILTERING */}
                     {(editForm.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).map((cat) => (
-                      <option key={cat} value={cat} style={{ backgroundColor: '#1a1a1a' }}>
-                        {cat}
-                      </option>
+                      <option key={cat} value={cat} style={{ backgroundColor: '#1a1a1a' }}>{cat}</option>
                     ))}
                   </select>
                 </div>
@@ -258,11 +250,8 @@ const RecentTransactions = ({
                     type="date"
                     value={editForm.date}
                     onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                    className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)'
-                    }}
+                    className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}
                   />
                 </div>
               </div>
@@ -273,25 +262,22 @@ const RecentTransactions = ({
                   type="text"
                   value={editForm.note}
                   onChange={(e) => setEditForm({ ...editForm, note: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all"
-                  style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    borderColor: 'rgba(255, 255, 255, 0.1)'
-                  }}
+                  className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                 />
               </div>
 
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={() => setEditingTx(null)}
-                  className="flex-1 px-4 py-3 rounded-lg border font-medium transition-colors hover:bg-white/5"
+                  className="flex-1 px-4 py-3 rounded-lg border font-medium transition-colors hover:bg-white/5 cursor-pointer"
                   style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: '#9ca3af' }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90"
+                  className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90 cursor-pointer"
                   style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
                 >
                   Save Changes
@@ -301,6 +287,15 @@ const RecentTransactions = ({
           </motion.div>
         </div>
       )}
+
+      {/* Delete Confirm Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deletingTx}
+        title="Delete Transaction"
+        description={`Are you sure you want to delete this ${deletingTx?.type} of ${deletingTx ? formatCurrency(deletingTx.amount) : ''}? This cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletingTx(null)}
+      />
     </>
   );
 };

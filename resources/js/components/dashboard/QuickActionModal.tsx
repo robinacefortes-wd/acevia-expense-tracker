@@ -1,8 +1,9 @@
 import { router } from '@inertiajs/react';
 import { X, TrendingUp, TrendingDown, Clock, PiggyBank, Target } from 'lucide-react';
-import type { FormEvent } from 'react';
 import { useState } from 'react';
+import { useToast } from '@/components/dashboard/ToastContext';
 import type { Transaction, Budget, SavingsData } from '@/types/index';
+import type { FormEvent } from 'react';
 
 interface QuickActionModalProps {
   isOpen: boolean;
@@ -29,6 +30,8 @@ interface BudgetFormData {
 type TabType = 'expense' | 'income' | 'savings' | 'budget';
 
 const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
+  const { showToast } = useToast();
+
   const [activeTab, setActiveTab] = useState<TabType>('expense');
   const [formData, setFormData] = useState<FormData>({
     amount: '',
@@ -61,7 +64,12 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
           note: formData.note,
           date: formData.date
         }, {
-          onSuccess: () => { resetForm(); onClose(); }
+          onSuccess: () => {
+            showToast('Savings added successfully!');
+            resetForm();
+            onClose();
+          },
+          onError: () => showToast('Failed to add savings.', 'error'),
         });
       }
     } else if (activeTab === 'budget') {
@@ -72,9 +80,11 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
           period: budgetData.period
         }, {
           onSuccess: () => {
+            showToast('Budget created successfully!');
             setBudgetData({ category: '', limit: '', period: 'month' });
             onClose();
-          }
+          },
+          onError: () => showToast('Failed to create budget.', 'error'),
         });
       }
     } else {
@@ -85,7 +95,12 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
           type: activeTab as 'income' | 'expense',
           time: activeTab === 'expense' ? formData.time : undefined
         }, {
-          onSuccess: () => { resetForm(); onClose(); }
+          onSuccess: () => {
+            showToast(`${activeTab === 'expense' ? 'Expense' : 'Income'} added successfully!`);
+            resetForm();
+            onClose();
+          },
+          onError: () => showToast(`Failed to add ${activeTab}.`, 'error'),
         });
       }
     }
@@ -139,9 +154,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
               type="button"
               onClick={() => setActiveTab('expense')}
               className={`flex flex-col items-center justify-center gap-2 px-3 py-3 rounded-lg transition-all cursor-pointer ${
-                activeTab === 'expense'
-                  ? 'bg-red-500/20 text-red-500'
-                  : 'text-gray-400 hover:text-white'
+                activeTab === 'expense' ? 'bg-red-500/20 text-red-500' : 'text-gray-400 hover:text-white'
               }`}
             >
               <TrendingDown className="w-5 h-5" />
@@ -152,9 +165,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
               type="button"
               onClick={() => setActiveTab('income')}
               className={`flex flex-col items-center justify-center gap-2 px-3 py-3 rounded-lg transition-all cursor-pointer ${
-                activeTab === 'income'
-                  ? 'bg-green-500/20 text-green-500'
-                  : 'text-gray-400 hover:text-white'
+                activeTab === 'income' ? 'bg-green-500/20 text-green-500' : 'text-gray-400 hover:text-white'
               }`}
             >
               <TrendingUp className="w-5 h-5" />
@@ -165,9 +176,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
               type="button"
               onClick={() => setActiveTab('savings')}
               className={`flex flex-col items-center justify-center gap-2 px-3 py-3 rounded-lg transition-all cursor-pointer ${
-                activeTab === 'savings'
-                  ? 'bg-purple-500/20 text-purple-500'
-                  : 'text-gray-400 hover:text-white'
+                activeTab === 'savings' ? 'bg-purple-500/20 text-purple-500' : 'text-gray-400 hover:text-white'
               }`}
             >
               <PiggyBank className="w-5 h-5" />
@@ -178,9 +187,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
               type="button"
               onClick={() => setActiveTab('budget')}
               className={`flex flex-col items-center justify-center gap-2 px-3 py-3 rounded-lg transition-all cursor-pointer ${
-                activeTab === 'budget'
-                  ? 'bg-blue-500/20 text-blue-500'
-                  : 'text-gray-400 hover:text-white'
+                activeTab === 'budget' ? 'bg-blue-500/20 text-blue-500' : 'text-gray-400 hover:text-white'
               }`}
             >
               <Target className="w-5 h-5" />
@@ -201,18 +208,12 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                     value={budgetData.category}
                     onChange={(e) => setBudgetData({ ...budgetData, category: e.target.value })}
                     className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                      colorScheme: 'dark'
-                    }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}
                     required
                   >
                     <option value="" disabled>Select category</option>
                     {budgetCategories.map((cat) => (
-                      <option key={cat} value={cat} style={{ backgroundColor: '#1a1a1a' }}>
-                        {cat}
-                      </option>
+                      <option key={cat} value={cat} style={{ backgroundColor: '#1a1a1a' }}>{cat}</option>
                     ))}
                   </select>
                 </div>
@@ -226,17 +227,13 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                     value={budgetData.period}
                     onChange={(e) => setBudgetData({ ...budgetData, period: e.target.value as 'today' | 'week' | 'month' | 'year' })}
                     className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                      colorScheme: 'dark'
-                    }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}
                     required
                   >
                     <option value="today" style={{ backgroundColor: '#1a1a1a' }}>Today</option>
-                    <option value="week" style={{ backgroundColor: '#1a1a1a' }}>This Week</option>
+                    <option value="week"  style={{ backgroundColor: '#1a1a1a' }}>This Week</option>
                     <option value="month" style={{ backgroundColor: '#1a1a1a' }}>This Month</option>
-                    <option value="year" style={{ backgroundColor: '#1a1a1a' }}>This Year</option>
+                    <option value="year"  style={{ backgroundColor: '#1a1a1a' }}>This Year</option>
                   </select>
                 </div>
 
@@ -252,10 +249,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                     value={budgetData.limit}
                     onChange={(e) => setBudgetData({ ...budgetData, limit: e.target.value })}
                     className="w-full px-4 py-3 rounded-lg border text-white placeholder:text-gray-500 focus:outline-none transition-all text-lg"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)'
-                    }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                     required
                   />
                 </div>
@@ -275,10 +269,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                     className="w-full px-4 py-3 rounded-lg border text-white placeholder:text-gray-500 focus:outline-none transition-all text-lg"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)'
-                    }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                     required
                   />
                 </div>
@@ -293,11 +284,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                      colorScheme: 'dark'
-                    }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}
                     required
                   />
                 </div>
@@ -313,10 +300,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                     onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                     rows={3}
                     className="w-full px-4 py-3 rounded-lg border text-white placeholder:text-gray-500 focus:outline-none transition-all resize-none"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)'
-                    }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                   />
                 </div>
               </>
@@ -335,10 +319,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                     className="w-full px-4 py-3 rounded-lg border text-white placeholder:text-gray-500 focus:outline-none transition-all text-lg"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)'
-                    }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                     required
                   />
                 </div>
@@ -353,18 +334,12 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                      colorScheme: 'dark'
-                    }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}
                     required
                   >
                     <option value="" disabled>Select category</option>
                     {categories[activeTab as 'expense' | 'income'].map((cat) => (
-                      <option key={cat} value={cat} style={{ backgroundColor: '#1a1a1a' }}>
-                        {cat}
-                      </option>
+                      <option key={cat} value={cat} style={{ backgroundColor: '#1a1a1a' }}>{cat}</option>
                     ))}
                   </select>
                 </div>
@@ -381,11 +356,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer"
-                      style={{
-                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                        borderColor: 'rgba(255, 255, 255, 0.1)',
-                        colorScheme: 'dark'
-                      }}
+                      style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}
                       required
                     />
                   </div>
@@ -403,11 +374,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                         value={formData.time}
                         onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                         className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer"
-                        style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                          borderColor: 'rgba(255, 255, 255, 0.1)',
-                          colorScheme: 'dark'
-                        }}
+                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }}
                         required
                       />
                     </div>
@@ -426,10 +393,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                     onChange={(e) => setFormData({ ...formData, note: e.target.value })}
                     rows={3}
                     className="w-full px-4 py-3 rounded-lg border text-white placeholder:text-gray-500 focus:outline-none transition-all resize-none"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)'
-                    }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                   />
                 </div>
               </>
@@ -441,10 +405,7 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                 type="button"
                 onClick={onClose}
                 className="flex-1 px-6 py-4 rounded-lg border font-medium transition-colors hover:bg-white/5 text-base cursor-pointer"
-                style={{
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
-                  color: '#9ca3af'
-                }}
+                style={{ borderColor: 'rgba(255, 255, 255, 0.1)', color: '#9ca3af' }}
               >
                 Cancel
               </button>
@@ -452,11 +413,9 @@ const QuickActionModal = ({ isOpen, onClose }: QuickActionModalProps) => {
                 type="submit"
                 data-testid="submit-transaction"
                 className="flex-1 px-6 py-4 rounded-lg font-medium text-white transition-all hover:opacity-90 text-base cursor-pointer"
-                style={{
-                  background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)'
-                }}
+                style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
               >
-                {activeTab === 'budget' ? 'Create Budget' :
+                {activeTab === 'budget'  ? 'Create Budget'  :
                  activeTab === 'savings' ? 'Add to Savings' :
                  `Add ${activeTab === 'expense' ? 'Expense' : 'Income'}`}
               </button>

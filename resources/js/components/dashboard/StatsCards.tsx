@@ -7,7 +7,7 @@ import { formatCurrency } from '@/utils/formatCurrency';
 
 interface StatsCardsProps {
   transactions: Transaction[];
-  savings: number; // This is the totalSum we calculated in Dashboard.tsx
+  savings: number;
   onEditSavings: (amount: number, date: string) => void;
 }
 
@@ -25,18 +25,16 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [editAmount, setEditAmount] = useState<string>('');
 
-  // 1. Calculate current period stats (Backend values can sometimes come as strings)
   const income = transactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + parseFloat(t.amount.toString() || '0'), 0);
-  
+
   const expenses = transactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + parseFloat(t.amount.toString() || '0'), 0);
-  
+
   const balance = income - expenses;
 
-  // 2. Date filtering logic for percentage changes
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
   const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
@@ -54,7 +52,7 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
   const currentIncome = currentPeriodTransactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + parseFloat(t.amount.toString() || '0'), 0);
-  
+
   const previousIncome = previousPeriodTransactions
     .filter(t => t.type === 'income')
     .reduce((sum, t) => sum + parseFloat(t.amount.toString() || '0'), 0);
@@ -62,7 +60,7 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
   const currentExpenses = currentPeriodTransactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + parseFloat(t.amount.toString() || '0'), 0);
-  
+
   const previousExpenses = previousPeriodTransactions
     .filter(t => t.type === 'expense')
     .reduce((sum, t) => sum + parseFloat(t.amount.toString() || '0'), 0);
@@ -70,7 +68,6 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
   const currentBalance = currentIncome - currentExpenses;
   const previousBalance = previousIncome - previousExpenses;
 
-  // 3. Percentage changes
   const calculatePercentageChange = (current: number, previous: number): string => {
     if (previous === 0) return current > 0 ? '+100.0%' : '0.0%';
     const change = ((current - previous) / previous) * 100;
@@ -80,8 +77,6 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
   const balanceChange = calculatePercentageChange(currentBalance, previousBalance);
   const incomeChange = calculatePercentageChange(currentIncome, previousIncome);
   const expensesChange = calculatePercentageChange(currentExpenses, previousExpenses);
-  
-  // Note: Savings change logic can be enhanced once you have historical savings data
   const savingsChange = savings > 0 ? '+100.0%' : '0.0%';
 
   const handleEditSavings = (): void => {
@@ -89,16 +84,14 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
     setShowEditModal(true);
   };
 
-
   const handleSaveEdit = (): void => {
     const amount = parseFloat(editAmount);
     if (!isNaN(amount) && amount >= 0) {
       const today = new Date().toISOString().split('T')[0];
-      onEditSavings(amount, today); // Calls Dashboard.tsx logic
-      setShowEditModal(false);     // Closes the modal locally
+      onEditSavings(amount, today); // toast fires in Dashboard.tsx onSuccess/onError
+      setShowEditModal(false);
     }
   };
-
 
   const stats: Stat[] = [
     {
@@ -122,7 +115,7 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
       value: formatCurrency(expenses),
       icon: TrendingDown,
       change: expensesChange,
-      positive: currentExpenses <= previousExpenses, // Lower expenses is positive
+      positive: currentExpenses <= previousExpenses,
       gradient: 'from-red-500 to-rose-500'
     },
     {
@@ -148,23 +141,21 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
             className="relative overflow-hidden rounded-2xl p-6 card-glass"
           >
-            {/* Icon Background */}
             <div className="absolute top-4 right-4 opacity-10">
               <stat.icon className="w-20 h-20" style={{ color: '#8151d9' }} />
             </div>
 
-            {/* Content */}
             <div className="relative">
               <div className="flex items-center justify-between mb-4">
-                <div 
+                <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{ 
+                  style={{
                     background: 'linear-gradient(135deg, rgba(129, 81, 217, 0.2) 0%, rgba(161, 120, 232, 0.2) 100%)',
                   }}
                 >
                   <stat.icon className="w-6 h-6" style={{ color: '#8151d9' }} />
                 </div>
-                <span 
+                <span
                   className="text-sm font-medium px-2 py-1 rounded-full"
                   style={{
                     color: stat.positive ? '#10b981' : '#ef4444',
@@ -193,9 +184,8 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
         ))}
       </div>
 
-      {/* Edit Savings Modal Logic Kept Original */}
       {showEditModal && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
           onClick={() => setShowEditModal(false)}
         >
@@ -228,13 +218,13 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 px-4 py-3 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 transition-colors"
+                  className="flex-1 px-4 py-3 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveEdit}
-                  className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90"
+                  className="flex-1 px-4 py-3 rounded-lg font-medium text-white transition-all hover:opacity-90 cursor-pointer"
                   style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)' }}
                 >
                   Save Changes

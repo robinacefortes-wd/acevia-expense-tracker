@@ -2,7 +2,7 @@ import { router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
     Camera, User, Mail, Phone, Trash2,
-    Activity, Calendar, Flame, CheckCircle, AlertCircle, Lock
+    Activity, Calendar, Flame, CheckCircle, AlertCircle, Lock, ArrowLeft
 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import Sidebar from '@/components/dashboard/Sidebar';
@@ -118,9 +118,17 @@ const Profile = () => {
                 <div className="w-full max-w-4xl px-8" style={{ position: 'relative', zIndex: 1 }}>
 
                     {/* Header */}
+                    <button
+                        onClick={() => router.visit('/dashboard')}
+                        className="flex items-center gap-2 theme-text-secondary hover:theme-text mb-4 transition-colors cursor-pointer"
+                        >
+                        <ArrowLeft className="w-5 h-5" />
+                        <span>Back to Dashboard</span>
+                    </button>
+
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 text-center">
-                        <h1 className="text-3xl font-bold theme-text">Profile</h1>
-                        <p className="theme-text-secondary text-sm mt-1">Manage your account information</p>
+                        <h1 className="flex items-center gap-2 text-3xl font-bold theme-text">Profile</h1>
+                        <p className="flex items-center gap-2 theme-text-secondary text-sm mt-1">Manage your account information</p>
                     </motion.div>
 
                     {/* Card */}

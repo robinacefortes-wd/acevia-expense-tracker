@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Search, ChevronLeft, ChevronRight, Download, Pencil, Trash2, TrendingUp, TrendingDown, Wallet, PiggyBank } from 'lucide-react';
 import { useState } from 'react';
 
+import DeleteConfirmModal from '@/components/dashboard/DeleteConfirmModal';
 import MiniCalculator from '@/components/dashboard/MiniCalculator';
 import Sidebar from '@/components/dashboard/Sidebar';
+import { useToast } from '@/components/dashboard/ToastContext';
 import { Badge } from '@/components/ui/badge';
 import type { Transaction } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
@@ -15,12 +17,14 @@ const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'H
 
 const AllTransactions = () => {
   const { transactions = [], totalSavings = 0 } = usePage<{ transactions: Transaction[]; totalSavings: number }>().props;
+  const { showToast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
   const [filterMonth, setFilterMonth] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [editingTx, setEditingTx] = useState<Transaction | null>(null);
+  const [deletingTx, setDeletingTx] = useState<Transaction | null>(null);
   const [editForm, setEditForm] = useState({
     amount: '',
     category: '',
@@ -110,36 +114,52 @@ const AllTransactions = () => {
         date: editForm.date,
         note: editForm.note,
         type: editForm.type
-      }, { onSuccess: () => setEditingTx(null) });
+      }, {
+        onSuccess: () => {
+          showToast('Transaction updated successfully!');
+          setEditingTx(null);
+        },
+        onError: () => showToast('Failed to update transaction.', 'error'),
+      });
     }
   };
 
-  const handleDelete = (tx: Transaction) => {
-    if (confirm('Are you sure you want to delete this transaction?')) {
-      router.post('/transactions/delete', { id: tx.id });
+  // --- DELETE ---
+  const handleDeleteConfirm = () => {
+    if (deletingTx) {
+      router.post('/transactions/delete', { id: deletingTx.id }, {
+        onSuccess: () => showToast('Transaction deleted.'),
+        onError: () => showToast('Failed to delete transaction.', 'error'),
+      });
+      setDeletingTx(null);
     }
   };
 
   // --- CSV EXPORT ---
   const handleExportCSV = () => {
-    const headers = ['Date', 'Category', 'Note', 'Amount', 'Type'];
-    const rows = processedTransactions.map(t => [
-      new Date(t.date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }),
-      t.category,
-      t.note || '',
-      t.type === 'expense' ? `-${t.amount}` : `${t.amount}`,
-      t.type
-    ]);
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(cell => `"${cell}"`).join(','))
-      .join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `transactions-${filterMonth !== 'all' ? filterMonth : 'all'}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    try {
+      const headers = ['Date', 'Category', 'Note', 'Amount', 'Type'];
+      const rows = processedTransactions.map(t => [
+        new Date(t.date).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }),
+        t.category,
+        t.note || '',
+        t.type === 'expense' ? `-${t.amount}` : `${t.amount}`,
+        t.type
+      ]);
+      const csvContent = [headers, ...rows]
+        .map(row => row.map(cell => `"${cell}"`).join(','))
+        .join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `transactions-${filterMonth !== 'all' ? filterMonth : 'all'}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Transactions exported successfully!');
+    } catch {
+      showToast('Failed to export transactions.', 'error');
+    }
   };
 
   return (
@@ -170,7 +190,7 @@ const AllTransactions = () => {
               </div>
               <button
                 onClick={handleExportCSV}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all hover:opacity-90"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all hover:opacity-90 cursor-pointer"
                 style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)', color: '#fff' }}
               >
                 <Download className="w-4 h-4" />
@@ -179,14 +199,13 @@ const AllTransactions = () => {
             </div>
           </motion.div>
 
-          {/* Summary Bar — 4 cards */}
+          {/* Summary Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.05 }}
             className="grid grid-cols-4 gap-4 mb-6"
           >
-            {/* Total Income */}
             <div className="card-glass rounded-2xl p-5 flex items-center gap-4" style={{ borderLeft: '3px solid #10b981' }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)' }}>
                 <TrendingUp className="w-5 h-5" style={{ color: '#10b981' }} />
@@ -201,7 +220,6 @@ const AllTransactions = () => {
               </div>
             </div>
 
-            {/* Total Expenses */}
             <div className="card-glass rounded-2xl p-5 flex items-center gap-4" style={{ borderLeft: '3px solid #ef4444' }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)' }}>
                 <TrendingDown className="w-5 h-5" style={{ color: '#ef4444' }} />
@@ -214,7 +232,6 @@ const AllTransactions = () => {
               </div>
             </div>
 
-            {/* Net Balance */}
             <div className="card-glass rounded-2xl p-5 flex items-center gap-4" style={{ borderLeft: `3px solid ${netBalance >= 0 ? '#8151d9' : '#f59e0b'}` }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: netBalance >= 0 ? 'rgba(129, 81, 217, 0.15)' : 'rgba(245, 158, 11, 0.15)' }}>
                 <Wallet className="w-5 h-5" style={{ color: netBalance >= 0 ? '#8151d9' : '#f59e0b' }} />
@@ -227,7 +244,6 @@ const AllTransactions = () => {
               </div>
             </div>
 
-            {/* Total Savings */}
             <div className="card-glass rounded-2xl p-5 flex items-center gap-4" style={{ borderLeft: '3px solid #06b6d4' }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(6, 182, 212, 0.15)' }}>
                 <PiggyBank className="w-5 h-5" style={{ color: '#06b6d4' }} />
@@ -246,14 +262,12 @@ const AllTransactions = () => {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="card-glass rounded-2xl p-6"
           >
-            {/* Table Header: Title + Search + Filters in one row */}
             <div className="flex flex-wrap items-center gap-3 mb-6">
               <h3 className="text-xl font-semibold theme-text">
                 {processedTransactions.length} Transaction{processedTransactions.length !== 1 ? 's' : ''}
                 {filterMonth !== 'all' && ` in ${getMonthLabel(filterMonth)}`}
               </h3>
 
-              {/* Search — right after title */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 theme-text-secondary" />
                 <input
@@ -265,10 +279,8 @@ const AllTransactions = () => {
                 />
               </div>
 
-              {/* Divider */}
               <div className="w-px h-5" style={{ backgroundColor: 'rgba(255,255,255,0.12)' }} />
 
-              {/* Type Filter */}
               <div className="flex gap-1">
                 {(['all', 'income', 'expense'] as const).map(type => (
                   <button
@@ -287,7 +299,6 @@ const AllTransactions = () => {
                 ))}
               </div>
 
-              {/* Month Filter */}
               <select
                 value={filterMonth}
                 onChange={(e) => handleFilterChange(setFilterMonth)(e.target.value)}
@@ -297,15 +308,9 @@ const AllTransactions = () => {
                           focus:outline-none transition-colors cursor-pointer"
                 style={{ colorScheme: 'inherit' }}
               >
-                <option value="all" className="bg-white text-gray-900 dark:bg-[#1a1a1a] dark:text-white">
-                  All Months
-                </option>
+                <option value="all" className="bg-white text-gray-900 dark:bg-[#1a1a1a] dark:text-white">All Months</option>
                 {availableMonths.map((month) => (
-                  <option
-                    key={month}
-                    value={month}
-                    className="bg-white text-gray-900 dark:bg-[#1a1a1a] dark:text-white"
-                  >
+                  <option key={month} value={month} className="bg-white text-gray-900 dark:bg-[#1a1a1a] dark:text-white">
                     {getMonthLabel(month)}
                   </option>
                 ))}
@@ -388,7 +393,7 @@ const AllTransactions = () => {
                                 <button onClick={() => handleEditClick(transaction)} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
                                   <Pencil className="w-4 h-4 theme-text-secondary" />
                                 </button>
-                                <button onClick={() => handleDelete(transaction)} className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer">
+                                <button onClick={() => setDeletingTx(transaction)} className="p-1.5 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer">
                                   <Trash2 className="w-4 h-4 text-red-500" />
                                 </button>
                               </div>
@@ -402,7 +407,6 @@ const AllTransactions = () => {
                   </table>
                 </div>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-center mt-6 pt-6 border-t theme-border gap-3">
                     <button
@@ -465,7 +469,7 @@ const AllTransactions = () => {
                 </div>
                 <div>
                   <label className="text-gray-300 text-sm font-medium mb-2 block">Date</label>
-                  <input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }} />
+                  <input type="date" value={editForm.date} onChange={(e) => setEditForm({ ...editForm, date: e.target.value })} className="w-full px-4 py-3 rounded-lg border text-white focus:outline-none transition-all cursor-pointer" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', borderColor: 'rgba(255, 255, 255, 0.1)', colorScheme: 'dark' }} />
                 </div>
               </div>
               <div>
@@ -480,6 +484,15 @@ const AllTransactions = () => {
           </motion.div>
         </div>
       )}
+
+      {/* Delete Confirm Modal */}
+      <DeleteConfirmModal
+        isOpen={!!deletingTx}
+        title="Delete Transaction"
+        description={`Are you sure you want to delete this ${deletingTx?.type} of ${deletingTx ? formatCurrency(deletingTx.amount) : ''}? This cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletingTx(null)}
+      />
 
       <MiniCalculator buttonBottom="bottom-8" panelBottom="bottom-28" />
     </div>
