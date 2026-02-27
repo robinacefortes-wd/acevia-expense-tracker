@@ -5,7 +5,6 @@ import { useState, useMemo, useCallback } from 'react';
 import {
   AreaChart, Area, LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
-  type TooltipProps,
 } from 'recharts';
 
 import MiniCalculator from '@/components/dashboard/MiniCalculator';
@@ -30,14 +29,26 @@ const getDaysInMonth = (year: number, month: number): number =>
   new Date(year, month + 1, 0).getDate();
 
 // ─── Custom Tooltip ───────────────────────────────────────────────────────────
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
+interface TooltipEntry {
+  name?: string;
+  value?: number | string;
+  color?: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string | number;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="px-4 py-3 rounded-xl" style={{ background: 'rgba(10,10,10,0.95)', border: '1px solid rgba(129,81,217,0.3)' }}>
-        <p className="text-xs text-gray-400 mb-2">{label}</p>
-        {payload.map((p) => (
-          <p key={p.dataKey as string} className="text-sm font-semibold" style={{ color: p.color }}>
-            {p.name}: {formatCurrency(p.value as number)}
+        <p className="text-xs text-gray-400 mb-2">{label ?? ''}</p>
+        {payload.map((p, index) => (
+          <p key={index} className="text-sm font-semibold" style={{ color: p.color }}>
+            {p.name}: {formatCurrency((p.value as number) ?? 0)}
           </p>
         ))}
       </div>

@@ -194,6 +194,7 @@ export default function Register() {
                                                     name="phone"
                                                     required
                                                     tabIndex={4}
+                                                    maxLength={14}
                                                     autoComplete="tel"
                                                     value={phone}
                                                     onChange={handlePhoneChange}
@@ -288,7 +289,7 @@ export default function Register() {
                                             type="submit"
                                             tabIndex={7}
                                             data-test="register-user-button"
-                                            className="w-full py-2.5 rounded-lg text-sm font-semibold text-white flex items-center justify-center gap-2 transition-opacity mt-1"
+                                            className="w-full py-2.5 rounded-lg text-sm font-semibold cursor-pointer text-white flex items-center justify-center gap-2 transition-opacity mt-1"
                                             style={{
                                                 background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)',
                                                 opacity: processing ? 0.7 : 1,
