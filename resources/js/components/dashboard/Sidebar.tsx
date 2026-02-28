@@ -51,10 +51,10 @@ const Sidebar = () => {
             <motion.div
               className="flex items-center gap-3 rounded-xl px-1 py-1 transition-colors theme-nav-item cursor-pointer"
             >
-              {/* Avatar */}
+              {/* Avatar — Cloudinary returns a full https:// URL, use directly */}
               {user?.avatar ? (
                 <img
-                  src={`/storage/${user.avatar}`}
+                  src={user.avatar}
                   alt={fullName}
                   className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                 />

@@ -5,17 +5,31 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Cloudinary\Cloudinary;
+use Cloudinary\Configuration\Configuration;
 
 class ProfileController extends Controller
 {
+    private function getCloudinary(): Cloudinary
+    {
+        return new Cloudinary(
+            Configuration::instance([
+                'cloud' => [
+                    'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+                    'api_key'    => env('CLOUDINARY_API_KEY'),
+                    'api_secret' => env('CLOUDINARY_API_SECRET'),
+                ],
+                'url' => ['secure' => true],
+            ])
+        );
+    }
+
     public function index()
     {
         $user = Auth::user();
         $transactions = $user->transactions()->get();
 
-        // Longest no-spend streak
         $expenseDates = $user->transactions()
             ->where('type', 'expense')
             ->orderBy('date', 'asc')
@@ -79,14 +93,30 @@ class ProfileController extends Controller
         ]);
 
         $user = Auth::user();
+        $cloudinary = $this->getCloudinary();
 
         // Delete old avatar if exists
-        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-            Storage::disk('public')->delete($user->avatar);
+        if ($user->avatar && str_contains($user->avatar, 'cloudinary.com')) {
+            $publicId = pathinfo(parse_url($user->avatar, PHP_URL_PATH), PATHINFO_FILENAME);
+            $cloudinary->uploadApi()->destroy('acevia/avatars/' . $publicId);
         }
 
-        $path = $request->file('avatar')->store('avatars', 'public');
-        $user->update(['avatar' => $path]);
+        // Upload new avatar
+        $result = $cloudinary->uploadApi()->upload(
+            $request->file('avatar')->getRealPath(),
+            [
+                'folder' => 'acevia/avatars',
+                'transformation' => [
+                    'width'   => 300,
+                    'height'  => 300,
+                    'crop'    => 'fill',
+                    'gravity' => 'face',
+                ],
+            ]
+        );
+
+        $avatarUrl = $result['secure_url'];
+        $user->update(['avatar' => $avatarUrl]);
 
         return back()->with('success', 'Avatar updated!');
     }
@@ -122,9 +152,14 @@ class ProfileController extends Controller
             return back()->withErrors(['password' => 'Incorrect password.']);
         }
 
+        if ($user->avatar && str_contains($user->avatar, 'cloudinary.com')) {
+            $publicId = pathinfo(parse_url($user->avatar, PHP_URL_PATH), PATHINFO_FILENAME);
+            $cloudinary = $this->getCloudinary();
+            $cloudinary->uploadApi()->destroy('acevia/avatars/' . $publicId);
+        }
+
         Auth::logout();
         $user->delete();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

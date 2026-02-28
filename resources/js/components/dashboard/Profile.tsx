@@ -2,10 +2,11 @@ import { router, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
     Camera, User, Mail, Phone, Trash2,
-    Activity, Calendar, Flame, CheckCircle, AlertCircle, Lock, ArrowLeft
+    Activity, Calendar, Flame, Lock, ArrowLeft
 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import Sidebar from '@/components/dashboard/Sidebar';
+import { useToast } from '@/components/dashboard/ToastContext';
 
 interface UserData {
     id: number;
@@ -25,6 +26,7 @@ interface Stats {
 
 const Profile = () => {
     const { user, stats } = usePage<{ user: UserData; stats: Stats }>().props;
+    const { showToast } = useToast();
 
     const stripPrefix = (phone: string) => {
         if (!phone) return '';
@@ -37,11 +39,10 @@ const Profile = () => {
         phone: stripPrefix(user.phone || ''),
     });
     const [profileLoading, setProfileLoading] = useState(false);
-    const [profileSuccess, setProfileSuccess] = useState('');
-    const [profileError, setProfileError] = useState('');
 
+    // Cloudinary returns a full https:// URL — no /storage/ prefix needed
     const [avatarPreview, setAvatarPreview] = useState<string | null>(
-        user.avatar ? `/storage/${user.avatar}` : null
+        user.avatar || null
     );
     const [avatarLoading, setAvatarLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -63,22 +64,24 @@ const Profile = () => {
         const formData = new FormData();
         formData.append('avatar', file);
         router.post('/profile/avatar', formData, {
-            onSuccess: () => setAvatarPreview(objectUrl),
+            onSuccess: () => {
+                setAvatarPreview(objectUrl);
+                showToast('Profile photo updated!');
+            },
+            onError: () => showToast('Failed to upload photo.', 'error'),
             onFinish: () => setAvatarLoading(false),
         });
     };
 
     const handleProfileSave = () => {
         setProfileLoading(true);
-        setProfileSuccess('');
-        setProfileError('');
         router.post('/profile/update', {
             ...profileForm,
             email: user.email,
             phone: `+63 ${profileForm.phone}`,
         }, {
-            onSuccess: () => setProfileSuccess('Profile updated successfully!'),
-            onError: () => setProfileError('Failed to update profile.'),
+            onSuccess: () => showToast('Profile updated successfully!'),
+            onError: () => showToast('Failed to update profile.', 'error'),
             onFinish: () => setProfileLoading(false),
         });
     };
@@ -117,11 +120,10 @@ const Profile = () => {
 
                 <div className="w-full max-w-4xl px-8" style={{ position: 'relative', zIndex: 1 }}>
 
-                    {/* Header */}
                     <button
                         onClick={() => router.visit('/dashboard')}
                         className="flex items-center gap-2 theme-text-secondary hover:theme-text mb-4 transition-colors cursor-pointer"
-                        >
+                    >
                         <ArrowLeft className="w-5 h-5" />
                         <span>Back to Dashboard</span>
                     </button>
@@ -176,10 +178,8 @@ const Profile = () => {
                                 </div>
                             </div>
 
-                            {/* Divider */}
                             <div style={{ height: '1px', backgroundColor: 'rgba(128,128,128,0.12)' }} />
 
-                            {/* Personal Info heading */}
                             <h2 className="text-sm font-semibold theme-text flex items-center gap-2 -mb-3">
                                 <User className="w-4 h-4" style={{ color: '#8151d9' }} />
                                 Personal Information
@@ -259,7 +259,6 @@ const Profile = () => {
                                             e.currentTarget.parentElement!.style.boxShadow = 'none';
                                         }}
                                     />
-                                    
                                 </div>
                             </div>
 
@@ -273,16 +272,6 @@ const Profile = () => {
                                 >
                                     {profileLoading ? 'Saving...' : 'Save Changes'}
                                 </button>
-                                {profileSuccess && (
-                                    <span className="flex items-center gap-1 text-xs" style={{ color: '#10b981' }}>
-                                        <CheckCircle className="w-3.5 h-3.5" /> {profileSuccess}
-                                    </span>
-                                )}
-                                {profileError && (
-                                    <span className="flex items-center gap-1 text-xs" style={{ color: '#ef4444' }}>
-                                        <AlertCircle className="w-3.5 h-3.5" /> {profileError}
-                                    </span>
-                                )}
                             </div>
                         </div>
 
