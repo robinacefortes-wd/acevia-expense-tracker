@@ -11,8 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import type { Transaction } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
 
-<Head title="Records" />
-
 const ITEMS_PER_PAGE = 10;
 const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];
 const EXPENSE_CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Healthcare', 'Other'];
@@ -166,6 +164,7 @@ const AllTransactions = () => {
 
   return (
     <div className="flex min-h-screen theme-bg">
+      <Head title="Records" />
       <Sidebar />
 
       <main className="flex-1 overflow-auto" style={{ marginLeft: '72px' }}>

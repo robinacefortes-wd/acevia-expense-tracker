@@ -8,8 +8,6 @@ import { useState, useRef } from 'react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { useToast } from '@/components/dashboard/ToastContext';
 
-<Head title="Profile" />
-
 interface UserData {
     id: number;
     first_name: string;
@@ -99,6 +97,7 @@ const Profile = () => {
 
     return (
         <div className="flex min-h-screen theme-bg">
+            <Head title="Profile" />
             <Sidebar />
 
             <main className="flex-1 flex items-center justify-center relative overflow-hidden" style={{ marginLeft: '72px' }}>

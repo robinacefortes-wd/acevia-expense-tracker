@@ -12,8 +12,6 @@ import Sidebar from '@/components/dashboard/Sidebar';
 import type { Transaction } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
 
-<Head title="Analytics" />
-
 type DateRange = 'this_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'specific_month';
 
 const RANGE_LABELS: Record<DateRange, string> = {
@@ -281,6 +279,7 @@ const Analytics = () => {
 
   return (
     <div className="flex min-h-screen theme-bg">
+      <Head title="Analytics" />
       <Sidebar />
 
       <main className="flex-1 overflow-auto" style={{ marginLeft: '72px' }}>
