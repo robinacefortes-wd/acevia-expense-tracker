@@ -1,4 +1,4 @@
-import { router, usePage } from '@inertiajs/react';
+import { router, usePage, Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Search, ChevronLeft, ChevronRight, Download, Pencil, Trash2, TrendingUp, TrendingDown, Wallet, PiggyBank } from 'lucide-react';
 import { useState } from 'react';
@@ -10,6 +10,8 @@ import { useToast } from '@/components/dashboard/ToastContext';
 import { Badge } from '@/components/ui/badge';
 import type { Transaction } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
+
+<Head title="Records" />
 
 const ITEMS_PER_PAGE = 10;
 const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Investment', 'Gift', 'Other'];

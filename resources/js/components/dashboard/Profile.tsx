@@ -1,4 +1,4 @@
-import { router, usePage } from '@inertiajs/react';
+import { router, usePage, Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
     Camera, User, Mail, Phone, Trash2,
@@ -7,6 +7,8 @@ import {
 import { useState, useRef } from 'react';
 import Sidebar from '@/components/dashboard/Sidebar';
 import { useToast } from '@/components/dashboard/ToastContext';
+
+<Head title="Profile" />
 
 interface UserData {
     id: number;

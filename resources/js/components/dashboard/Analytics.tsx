@@ -1,4 +1,4 @@
-import { usePage, router } from '@inertiajs/react';
+import { usePage, router, Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, TrendingUp, Zap, Calendar, Target, Award } from 'lucide-react';
 import { useState, useMemo, useCallback } from 'react';
@@ -11,6 +11,8 @@ import MiniCalculator from '@/components/dashboard/MiniCalculator';
 import Sidebar from '@/components/dashboard/Sidebar';
 import type { Transaction } from '@/types/index';
 import { formatCurrency } from '@/utils/formatCurrency';
+
+<Head title="Analytics" />
 
 type DateRange = 'this_month' | 'last_3_months' | 'last_6_months' | 'this_year' | 'specific_month';
 
