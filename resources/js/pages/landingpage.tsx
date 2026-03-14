@@ -4,6 +4,7 @@ import CTA from '@/components/landing page/CTA';
 import Features from '@/components/landing page/features'; 
 import Footer from '@/components/landing page/footer';     
 import Hero from '@/components/landing page/Hero';
+import Pricing from '@/components/landing page/Pricing';
 import Navbar from '@/components/landing page/Navbar';
 
 export default function LandingPage() {
@@ -16,6 +17,7 @@ export default function LandingPage() {
             <main>
                 <Hero />
                 <Features />
+                <Pricing />
                 <CTA />
             </main>
 
