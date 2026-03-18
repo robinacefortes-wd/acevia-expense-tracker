@@ -11,7 +11,7 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        return Inertia::render('Dashboard', [
+        return Inertia::render('dashboard', [
             'transactions' => $user->transactions()
                 ->orderBy('date', 'desc')
                 ->orderBy('created_at', 'desc')
