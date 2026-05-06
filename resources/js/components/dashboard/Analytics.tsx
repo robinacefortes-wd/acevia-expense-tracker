@@ -357,7 +357,7 @@ const Analytics = () => {
 
           <motion.div {...fadeUp(0.1)} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {/* Income vs Expenses summary */}
-            <div className="card-glass rounded-2xl p-6" style={{ borderLeft: '3px solid #10b981' }}>
+            <div className="card-glass rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(16,185,129,0.15)' }}>
                   <TrendingUp className="w-4 h-4" style={{ color: '#10b981' }} />
@@ -418,7 +418,7 @@ const Analytics = () => {
             </div>
 
             {/* Avg Daily Spend */}
-            <div className="card-glass rounded-2xl p-6" style={{ borderLeft: '3px solid #f59e0b' }}>
+            <div className="card-glass rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(245,158,11,0.15)' }}>
                   <Zap className="w-4 h-4" style={{ color: '#f59e0b' }} />
