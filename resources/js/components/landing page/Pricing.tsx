@@ -9,8 +9,7 @@ const plans = [
     price: '0',
     description: 'Perfect for individuals just getting started with expense tracking.',
     color: '#8151d9',
-    borderColor: 'rgba(129,81,217,0.3)',
-    glowColor: 'rgba(129,81,217,0.15)',
+    borderColor: 'rgba(255,255,255,0.1)',
     icon: Zap,
     features: [
       'Track unlimited transactions',
@@ -31,10 +30,9 @@ const plans = [
     name: 'Pro',
     badge: 'Beta — Free During Testing',
     price: '0',
-    description: 'Full access to all features while we\'re in beta. No credit card needed.',
+    description: "Full access to all features while we're in beta. No credit card needed.",
     color: '#10b981',
     borderColor: 'rgba(16,185,129,0.4)',
-    glowColor: 'rgba(16,185,129,0.12)',
     icon: Sparkles,
     features: [
       'Everything in Starter',
@@ -61,24 +59,9 @@ const Pricing: React.FC = () => {
     <section
       id="pricing"
       className="relative py-24 px-4 overflow-hidden"
-      style={{ backgroundColor: '#0303036e' }}
+      style={{ backgroundColor: '#030303' }}
     >
-      {/* Background orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute w-[500px] h-[500px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(129,81,217,0.15) 0%, transparent 70%)',
-            filter: 'blur(80px)',
-            top: '10%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-          }}
-        />
-      </div>
-
       <div className="max-w-5xl mx-auto relative z-10">
-
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -87,25 +70,11 @@ const Pricing: React.FC = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6"
-            style={{
-              backgroundColor: 'rgba(129,81,217,0.1)',
-              border: '1px solid rgba(129,81,217,0.3)',
-            }}
-          >
-            <Sparkles size={14} style={{ color: '#8151d9' }} />
-            <span className="text-sm font-medium" style={{ color: '#c4a7f5' }}>
-              Simple Pricing
-            </span>
-          </div>
-
           <h2
             className="text-4xl md:text-5xl font-bold mb-4"
             style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}
           >
-            Free During{' '}
-            <span style={{ color: '#8151d9' }}>Beta</span>
+            Free During <span style={{ color: '#8151d9' }}>Beta</span>
           </h2>
           <p
             className="text-lg max-w-xl mx-auto"
@@ -127,11 +96,8 @@ const Pricing: React.FC = () => {
               transition={{ duration: 0.5, delay: i * 0.15 }}
               className="relative rounded-2xl p-8 flex flex-col"
               style={{
-                backgroundColor: plan.popular ? 'rgba(16,185,129,0.05)' : 'rgba(255,255,255,0.03)',
+                backgroundColor: 'rgba(255,255,255,0.03)',
                 border: `1px solid ${plan.borderColor}`,
-                boxShadow: plan.popular
-                  ? '0 0 40px rgba(16,185,129,0.1), 0 20px 40px rgba(0,0,0,0.3)'
-                  : '0 20px 40px rgba(0,0,0,0.2)',
               }}
             >
               {/* Popular badge */}
@@ -144,27 +110,18 @@ const Pricing: React.FC = () => {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  ✦ Currently Free — Beta Access
+                  Currently Free — Beta Access
                 </div>
               )}
 
               {/* Plan header */}
               <div className="mb-6">
                 <div className="flex items-center gap-3 mb-3">
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: `${plan.color}20` }}
-                  >
-                    <plan.icon size={18} style={{ color: plan.color }} />
-                  </div>
                   <div>
                     <h3 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                       {plan.name}
                     </h3>
-                    <span
-                      className="text-xs font-medium"
-                      style={{ color: plan.color }}
-                    >
+                    <span className="text-xs font-medium" style={{ color: plan.color }}>
                       {plan.badge}
                     </span>
                   </div>
@@ -197,11 +154,8 @@ const Pricing: React.FC = () => {
               <ul className="flex flex-col gap-3 mb-8 flex-1">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-center gap-3">
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: `${plan.color}20` }}
-                    >
-                      <Check size={11} style={{ color: plan.color }} />
+                    <div className="flex-shrink-0">
+                      <Check size={16} style={{ color: plan.color }} />
                     </div>
                     <span className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>
                       {feature}
@@ -239,12 +193,13 @@ const Pricing: React.FC = () => {
             {['Secure & Private', 'No Ads', 'Always Improving'].map((item) => (
               <div key={item} className="flex items-center gap-1.5">
                 <Check size={12} style={{ color: '#8151d9' }} />
-                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{item}</span>
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  {item}
+                </span>
               </div>
             ))}
           </div>
         </motion.div>
-
       </div>
     </section>
   );

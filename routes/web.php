@@ -23,7 +23,7 @@ Route::get('/', function () {
 // 2. Protected Routes (Must be logged in)
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    // Dashboard - Using your new Controller
+    // Dashboard 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // All Transactions Page
@@ -32,7 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Analytics Page
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
 
-    // Profile Management (renamed to avoid conflict with settings/profile routes)
+    // Profile Management 
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.info.update');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');

@@ -51,10 +51,10 @@ const Navbar: React.FC = () => {
               Features
             </a>
             <a
-              href="#how-it-works"
+              href="#pricing"
               className="px-4 py-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/5 rounded-full transition-all duration-200 font-medium"
             >
-              How It Works
+              Pricing
             </a>
             <a
               href="/login"

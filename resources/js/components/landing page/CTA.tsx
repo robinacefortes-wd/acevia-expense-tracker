@@ -1,15 +1,6 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Check, TrendingUp, PiggyBank, BarChart3, Wallet, ShieldCheck, Zap } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import React from 'react';
-
-const floatingIcons = [
-  { icon: TrendingUp, x: '8%', y: '20%', delay: 0, duration: 6, color: '#8151d9' },
-  { icon: PiggyBank, x: '88%', y: '15%', delay: 1, duration: 7, color: '#10b981' },
-  { icon: BarChart3, x: '5%', y: '70%', delay: 2, duration: 5, color: '#f59e0b' },
-  { icon: Wallet, x: '90%', y: '65%', delay: 0.5, duration: 8, color: '#8151d9' },
-  { icon: ShieldCheck, x: '15%', y: '85%', delay: 1.5, duration: 6, color: '#10b981' },
-  { icon: Zap, x: '80%', y: '80%', delay: 2.5, duration: 7, color: '#f59e0b' },
-];
 
 const stats = [
   { value: '₱1M+', label: 'Tracked by users' },
@@ -23,32 +14,6 @@ const CTA: React.FC = () => {
       id="cta"
       className="relative py-32 px-4 overflow-hidden"
     >
-      {/* Floating background icons */}
-      {floatingIcons.map((item, i) => (
-        <motion.div
-          key={i}
-          className="absolute pointer-events-none"
-          style={{ left: item.x, top: item.y }}
-          animate={{ y: [0, -20, 0], opacity: [0.15, 0.35, 0.15] }}
-          transition={{
-            duration: item.duration,
-            repeat: Infinity,
-            ease: 'easeInOut',
-            delay: item.delay,
-          }}
-        >
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center"
-            style={{
-              backgroundColor: `${item.color}12`,
-              border: `1px solid ${item.color}25`,
-            }}
-          >
-            <item.icon size={20} style={{ color: item.color }} />
-          </div>
-        </motion.div>
-      ))}
-
       {/* Center glow */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -58,20 +23,6 @@ const CTA: React.FC = () => {
       />
 
       <div className="max-w-4xl mx-auto relative z-10">
-
-        {/* Top divider line */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="w-full h-px mb-16 mx-auto"
-          style={{
-            background: 'linear-gradient(to right, transparent, rgba(129,81,217,0.5), transparent)',
-            maxWidth: '400px',
-          }}
-        />
-
         {/* Stats row */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -135,7 +86,7 @@ const CTA: React.FC = () => {
             }}
           >
             Join users who are already taking control of their finances with
-            Acevia — the all-in-one expense tracker built for real life.
+            Acevia, the all-in-one expense tracker built for real life.
           </p>
         </motion.div>
 
@@ -197,19 +148,6 @@ const CTA: React.FC = () => {
             </div>
           ))}
         </motion.div>
-
-        {/* Bottom divider line */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="w-full h-px mt-16 mx-auto"
-          style={{
-            background: 'linear-gradient(to right, transparent, rgba(129,81,217,0.5), transparent)',
-            maxWidth: '400px',
-          }}
-        />
 
       </div>
     </section>

@@ -2,22 +2,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import React, { useState } from 'react';
 
-const metrics = [
-  { label: 'Total Income', value: '₱120,000', color: '#8151d9' },
-  { label: 'Total Expenses', value: '₱57,055', color: '#b91010' },
-  { label: 'Savings', value: '₱31,500', color: '#f59e0b' },
-];
-
 const Hero: React.FC = () => {
   const [activeMetric, setActiveMetric] = useState(0);
-
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveMetric(prev => (prev + 1) % metrics.length);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <section
       className="relative overflow-hidden bg-[var(--bg-page)]"
@@ -153,24 +139,6 @@ const Hero: React.FC = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
         >
-          {/* Badge */}
-          <motion.div
-  initial={{ opacity: 0, y: 10 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 0.2, duration: 0.5 }}
-  className="flex items-center gap-3 mb-8"
->
-  <div className="h-px w-8" style={{ backgroundColor: '#8151d9' }} />
-  <span className="text-xs font-bold uppercase tracking-[0.3em]" style={{ color: '#8151d9' }}>
-    Expense Tracker
-  </span>
-  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.15)' }}>/</span>
-  <span className="text-xs uppercase tracking-[0.3em]" style={{ color: 'rgba(255,255,255,0.3)' }}>
-    Beta
-  </span>
-  <div className="h-px w-8" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }} />
-</motion.div>
-
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -184,10 +152,8 @@ const Hero: React.FC = () => {
             }}
           >
             Track Expenses,
-            <br />
-            <span className="text-[var(--accent-primary)]">Build Better</span>
-            <br />
-            Habits
+            <br></br>
+            <span className="text-[var(--accent-primary)]">Build Better Habits</span>
           </motion.h1>
 
           <motion.p
@@ -202,7 +168,7 @@ const Hero: React.FC = () => {
             }}
           >
             The simplest way to monitor your spending, manage budgets, and gain
-            insights into your financial health—all in one beautiful app.
+            insights into your financial health. All in one beautiful app.
           </motion.p>
 
           <motion.div
@@ -230,42 +196,6 @@ const Hero: React.FC = () => {
             >
               Learn More
             </motion.a>
-          </motion.div>
-
-          {/* Glowing metric pills */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.65, duration: 0.6 }}
-            className="flex items-center gap-3 flex-wrap"
-          >
-            {metrics.map((metric, i) => (
-              <div
-                key={metric.label}
-                className="flex items-center gap-2 px-4 py-2 rounded-full"
-                style={{
-                  backgroundColor: activeMetric === i ? `${metric.color}18` : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${activeMetric === i ? `${metric.color}50` : 'rgba(255,255,255,0.08)'}`,
-                  boxShadow: activeMetric === i ? `0 0 16px ${metric.color}25` : 'none',
-                  transition: 'all 0.4s ease',
-                }}
-              >
-                <div
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{
-                    backgroundColor: metric.color,
-                    boxShadow: activeMetric === i ? `0 0 6px ${metric.color}` : 'none',
-                    transition: 'all 0.4s ease',
-                  }}
-                />
-                <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  {metric.label}
-                </span>
-                <span className="text-xs font-bold" style={{ color: activeMetric === i ? metric.color : 'rgba(255,255,255,0.7)' }}>
-                  {metric.value}
-                </span>
-              </div>
-            ))}
           </motion.div>
         </motion.div>
       </div>
