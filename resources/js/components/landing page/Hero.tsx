@@ -1,8 +1,29 @@
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion'; // Added Variants type for TypeScript
 import { ArrowRight } from 'lucide-react';
 import React from 'react';
 
 const Hero: React.FC = () => {
+  // --- 1. DEFINE VARIANTS (With Types) ---
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.45, // satisfying delay
+        delayChildren: 0.3,   // small initial pause
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, x: -30 }, // Slides in from left
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.8, ease: 'easeOut' },
+    },
+  };
+
   return (
     <section
       className="relative overflow-hidden bg-[var(--bg-page)]"
@@ -20,69 +41,85 @@ const Hero: React.FC = () => {
         }}
       />
 
-      {/* Animated Background Gradient Orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-1">
-        <motion.div
-          className="absolute w-[600px] h-[600px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(129, 81, 217, 0.3) 0%, rgba(129, 81, 217, 0.05) 40%, transparent 70%)',
-            filter: 'blur(60px)',
-          }}
-          animate={{ x: [0, 50, 0], y: [0, 30, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-          initial={{ top: '-10%', right: '-5%' }}
-        />
-      </div>
+      {/* GRADIENT OVERLAY */}
+      <div 
+        className="absolute inset-0 z-1 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to right, rgba(10,10,10,0.8) 0%, rgba(10,10,10,0.2) 60%, transparent 100%)',
+        }}
+      />
 
-      {/* MAIN CONTENT CONTAINER - Changed to a flex column with space-between */}
       <div
-        className="relative z-10 flex flex-col justify-between"
-        style={{ minHeight: '100vh', padding: 'clamp(2rem, 6vw, 8rem)' }}
+        className="relative z-10 flex items-center justify-start"
+        style={{ 
+          minHeight: '100vh', 
+          paddingLeft: 'clamp(2rem, 10vw, 16rem)', 
+          paddingRight: '2rem' 
+        }}
       >
-        
-        {/* TOP LEFT: HEADLINE */}
+        {/* --- 2. UPDATE THE MAIN CONTAINER --- */}
         <motion.div
-          className="w-full lg:w-[60%]"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="w-full lg:w-[65%] flex flex-col"
+          variants={containerVariants} // This connects the staggering logic
+          initial="hidden"             // Sets the start state
+          animate="visible"            // Triggers the children to follow
         >
+          {/* --- 3. APPLY ITEM VARIANTS (Fixed Errors) --- */}
+
+          {/* LINE 1: Track Expenses */}
           <motion.h1
-            className="font-bold"
+            variants={itemVariants}
+            className="font-bold" // Removed extra mb
             style={{
-              fontSize: 'clamp(2.5rem, 6vw, 5rem)',
-              lineHeight: '1',
+              fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
+              lineHeight: '1.1',
               letterSpacing: '-0.02em',
               color: 'var(--text-primary)',
             }}
           >
             Track Expenses,
-            <br />
-            <span className="text-[var(--accent-primary)]">Build Better Habits</span>
           </motion.h1>
-        </motion.div>
 
-        {/* BOTTOM RIGHT: SUBTEXT AND BUTTON */}
-        <motion.div
-          className="w-full lg:w-[40%] self-end text-right flex flex-col items-end"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-        >
+          {/* LINE 2: Build Better Habits */}
+          <motion.div 
+            variants={itemVariants} 
+            className="mb-12" // This ensures the spacing you wanted!
+          >
+             <span 
+              style={{ 
+                color: 'var(--accent-primary)',
+                fontFamily: '"Dancing Script", "Pacifico", cursive',
+                fontWeight: '400',
+                display: 'inline-block',
+                marginTop: '10px',
+                fontStyle: 'italic',
+                transform: 'skewX(-15deg) rotate(-1deg)',
+                fontSize: 'clamp(2.5rem, 5.5vw, 5rem)',
+                lineHeight: '1.2'
+              }}
+            >
+              Build Better Habits
+            </span>
+          </motion.div>
+
+          {/* LINE 3: Subtext */}
           <motion.p
-            className="mb-8"
+            variants={itemVariants}
+            className="mb-10"
             style={{
-              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+              fontSize: 'clamp(1.1rem, 2.5vw, 1.25rem)',
               lineHeight: '1.6',
               color: 'var(--text-secondary)',
-              maxWidth: '400px'
+              maxWidth: '520px',
+              opacity: 0.9 
             }}
           >
             The simplest way to monitor your spending, manage budgets, and gain
             insights into your financial health. All in one beautiful app.
           </motion.p>
 
-          <motion.div className="flex justify-end w-full">
+          {/* LINE 4: Button */}
+          <motion.div variants={itemVariants} className="flex">
             <motion.a
               href="/login"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-strong)] text-white rounded-full font-semibold text-lg shadow-lg shadow-[var(--accent-glow)] min-w-[220px] justify-center"
@@ -94,7 +131,6 @@ const Hero: React.FC = () => {
             </motion.a>
           </motion.div>
         </motion.div>
-
       </div>
     </section>
   );

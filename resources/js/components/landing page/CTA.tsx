@@ -12,13 +12,16 @@ const CTA: React.FC = () => {
   return (
     <section
       id="cta"
+      /* py-32 ensures consistency with your features section */
       className="relative py-32 px-4 overflow-hidden"
+      /* Set to pure black */
+      style={{ backgroundColor: '#000000' }}
     >
-      {/* Center glow */}
+      {/* Center glow - subtly adjusted for pure black background */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(129,81,217,0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(129,81,217,0.1) 0%, transparent 70%)',
         }}
       />
 

@@ -73,8 +73,10 @@ const Features: React.FC = () => {
   return (
     <section 
       id="features" 
-      className="relative pt-32 pb-10 px-4 overflow-hidden"
-      style={{ backgroundColor: '#0303036e' }}
+      /* Changed pt-32 pb-10 to py-32 for equal top/bottom margins */
+      className="relative py-32 px-4 overflow-hidden"
+      /* Changed to pure black */
+      style={{ backgroundColor: '#000000' }}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -101,10 +103,23 @@ const Features: React.FC = () => {
               style={{ letterSpacing: '-0.04em' }}
             >
               Stay Ahead <br /> 
-              <span style={{ color: '#8151d9' }}>Financially</span>
+              <span 
+                style={{ 
+                  color: '#8151d9',
+                  fontFamily: '"Dancing Script", "Pacifico", cursive',
+                  fontWeight: '400',
+                  display: 'inline-block',
+                  marginTop: '10px',
+                  fontStyle: 'italic',
+                  transform: 'skewX(-15deg) rotate(-1deg)',
+                  fontSize: '0.9em', // Adjusted down slightly so it fits the H2 scale nicely
+                  lineHeight: '1.2'
+                }}
+              >
+                Financially
+              </span>
             </motion.h2>
             
-            {/* Unified Font Sizes for Paragraphs */}
             <motion.p 
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -152,7 +167,7 @@ const Features: React.FC = () => {
                 <div 
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
                   style={{ 
-                    background: 'linear-gradient(145deg, rgba(129, 81, 217, 0.12) 0%, rgba(10, 10, 10, 1) 100%)' 
+                    background: 'linear-gradient(145deg, rgba(129, 81, 217, 0.12) 0%, rgba(0, 0, 0, 1) 100%)' 
                   }} 
                 />
 
