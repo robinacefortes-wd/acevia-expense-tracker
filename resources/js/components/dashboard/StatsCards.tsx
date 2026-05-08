@@ -88,7 +88,7 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
     const amount = parseFloat(editAmount);
     if (!isNaN(amount) && amount >= 0) {
       const today = new Date().toISOString().split('T')[0];
-      onEditSavings(amount, today); // toast fires in Dashboard.tsx onSuccess/onError
+      onEditSavings(amount, today); 
       setShowEditModal(false);
     }
   };
@@ -149,9 +149,6 @@ const StatsCards = ({ transactions = [], savings = 0, onEditSavings }: StatsCard
               <div className="flex items-center justify-between mb-4">
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(129, 81, 217, 0.2) 0%, rgba(161, 120, 232, 0.2) 100%)',
-                  }}
                 >
                   <stat.icon className="w-6 h-6" style={{ color: '#8151d9' }} />
                 </div>

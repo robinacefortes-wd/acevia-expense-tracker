@@ -359,8 +359,9 @@ const Analytics = () => {
             {/* Income vs Expenses summary */}
             <div className="card-glass rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(16,185,129,0.15)' }}>
-                  <TrendingUp className="w-4 h-4" style={{ color: '#10b981' }} />
+                {/* Background color removed */}
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5" style={{ color: '#10b981' }} />
                 </div>
                 <span className="theme-text-secondary text-sm font-medium">Income vs Expenses</span>
               </div>
@@ -391,8 +392,9 @@ const Analytics = () => {
             {/* Savings Rate Gauge */}
             <div className="card-glass rounded-2xl p-6 flex flex-col items-center">
               <div className="flex items-center gap-3 mb-4 w-full">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(129,81,217,0.15)' }}>
-                  <Target className="w-4 h-4" style={{ color: '#8151d9' }} />
+                {/* Background color removed */}
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center">
+                  <Target className="w-5 h-5" style={{ color: '#8151d9' }} />
                 </div>
                 <span className="theme-text-secondary text-sm font-medium">Savings Rate</span>
               </div>
@@ -413,15 +415,16 @@ const Analytics = () => {
                 </text>
               </svg>
               <p className="text-xs theme-text-secondary mt-2 text-center">
-                {savingsRate >= 20 ? '🎉 Great! Above the 20% target' : savingsRate >= 10 ? '⚠️ Getting there — aim for 20%' : '🔴 Below target — review spending'}
+                {savingsRate >= 20 ? 'Great! Above the 20% target' : savingsRate >= 10 ? 'Getting there — aim for 20%' : 'Below target — review spending'}
               </p>
             </div>
 
             {/* Avg Daily Spend */}
             <div className="card-glass rounded-2xl p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(245,158,11,0.15)' }}>
-                  <Zap className="w-4 h-4" style={{ color: '#f59e0b' }} />
+                {/* Background color removed */}
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center">
+                  <Zap className="w-5 h-5" style={{ color: '#f59e0b' }} />
                 </div>
                 <span className="theme-text-secondary text-sm font-medium">Avg Daily Spend</span>
               </div>
@@ -433,29 +436,6 @@ const Analytics = () => {
                 </p>
               </div>
             </div>
-          </motion.div>
-
-          {/* ── Income vs Expenses Line Chart ──────────────────────────────── */}
-          <motion.div {...fadeUp(0.15)} className="card-glass rounded-2xl p-8 mb-6">
-            <div className="flex items-center gap-3 mb-6">
-              <h3 className="text-lg font-semibold theme-text">Income vs Expenses Trend</h3>
-              <span className="text-xs theme-text-secondary">over time</span>
-            </div>
-            {trendData.length === 0 ? (
-              <div className="flex items-center justify-center h-48 theme-text-secondary text-sm">No data for this period</div>
-            ) : (
-              <ResponsiveContainer width="100%" height={380}>
-                <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="date" stroke="#6b7280" style={{ fontSize: '11px' }} />
-                  <YAxis stroke="#6b7280" style={{ fontSize: '11px' }} tickFormatter={(v: number) => `₱${(v/1000).toFixed(0)}k`} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: '12px', color: '#9ca3af' }} />
-                  <Line type="monotone" dataKey="income" name="Income" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3, fill: '#10b981' }} activeDot={{ r: 5 }} />
-                  <Line type="monotone" dataKey="expense" name="Expense" stroke="#ef4444" strokeWidth={2.5} dot={{ r: 3, fill: '#ef4444' }} activeDot={{ r: 5 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
           </motion.div>
 
           {/* ── Section 2: Behavioral Insights ─────────────────────────────── */}
@@ -545,7 +525,7 @@ const Analytics = () => {
                   },
                   {
                     label: 'Net Positive',
-                    value: totalIncome > totalExpenses ? 'Yes ✓' : 'No ✗',
+                    value: totalIncome > totalExpenses ? 'Yes' : 'No',
                     target: 'Income > Expenses',
                     met: totalIncome > totalExpenses,
                     pts: 35,
@@ -626,7 +606,6 @@ const Analytics = () => {
                   style={{ backgroundColor: 'rgba(129,81,217,0.08)', border: '1px solid rgba(129,81,217,0.15)', width: 'fit-content' }}
                 >
                   <div className="flex items-center gap-2">
-                    <Award className="w-4 h-4" style={{ color: '#8151d9' }} />
                     <span className="text-sm theme-text font-medium">Net Position</span>
                   </div>
                   <div className="w-px h-5" style={{ backgroundColor: 'rgba(129,81,217,0.2)' }} />

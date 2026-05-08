@@ -208,7 +208,7 @@ const AllTransactions = () => {
             className="grid grid-cols-4 gap-4 mb-6"
           >
             <div className="card-glass rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
                 <TrendingUp className="w-5 h-5" style={{ color: '#10b981' }} />
               </div>
               <div>
@@ -222,7 +222,7 @@ const AllTransactions = () => {
             </div>
 
             <div className="card-glass rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
                 <TrendingDown className="w-5 h-5" style={{ color: '#ef4444' }} />
               </div>
               <div>
@@ -234,7 +234,7 @@ const AllTransactions = () => {
             </div>
 
             <div className="card-glass rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: netBalance >= 0 ? 'rgba(129, 81, 217, 0.15)' : 'rgba(245, 158, 11, 0.15)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Wallet className="w-5 h-5" style={{ color: netBalance >= 0 ? '#8151d9' : '#f59e0b' }} />
               </div>
               <div>
@@ -246,7 +246,7 @@ const AllTransactions = () => {
             </div>
 
             <div className="card-glass rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ backgroundColor: 'rgba(6, 182, 212, 0.15)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
                 <PiggyBank className="w-5 h-5" style={{ color: '#06b6d4' }} />
               </div>
               <div>

@@ -143,7 +143,6 @@ const BudgetManagement = ({ transactions, budgets, onEditBudget, onDeleteBudget 
                     <div className="flex items-center gap-3">
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: `${budget.color}20` }}
                       >
                         <budget.icon className="w-5 h-5" style={{ color: budget.color }} />
                       </div>

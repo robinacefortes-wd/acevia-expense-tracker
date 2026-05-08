@@ -1,182 +1,88 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import React, { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
+import React from 'react';
 
 const Hero: React.FC = () => {
-  const [activeMetric, setActiveMetric] = useState(0);
   return (
     <section
       className="relative overflow-hidden bg-[var(--bg-page)]"
       style={{ minHeight: '100vh' }}
     >
+      {/* FULL PAGE BACKGROUND IMAGE */}
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          backgroundImage: `url("/acevia-hero-background.jpg")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          opacity: 0.4,
+        }}
+      />
+
       {/* Animated Background Gradient Orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-1">
         <motion.div
           className="absolute w-[600px] h-[600px] rounded-full"
           style={{
-            background: 'radial-gradient(circle, rgba(129, 81, 217, 0.4) 0%, rgba(129, 81, 217, 0.1) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(129, 81, 217, 0.3) 0%, rgba(129, 81, 217, 0.05) 40%, transparent 70%)',
             filter: 'blur(60px)',
           }}
           animate={{ x: [0, 50, 0], y: [0, 30, 0], scale: [1, 1.1, 1] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
           initial={{ top: '-10%', right: '-5%' }}
         />
-        <motion.div
-          className="absolute w-[400px] h-[400px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(129, 81, 217, 0.35) 0%, rgba(129, 81, 217, 0.08) 50%, transparent 70%)',
-            filter: 'blur(50px)',
-          }}
-          animate={{ x: [0, -40, 0], y: [0, 50, 0], scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          initial={{ top: '30%', right: '10%' }}
-        />
-        <motion.div
-          className="absolute w-[300px] h-[300px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(129, 81, 217, 0.3) 0%, rgba(106, 62, 196, 0.15) 40%, transparent 70%)',
-            filter: 'blur(40px)',
-          }}
-          animate={{ x: [0, 30, 0], y: [0, -40, 0], scale: [1, 1.2, 1] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-          initial={{ bottom: '10%', right: '20%' }}
-        />
-        <motion.div
-          className="absolute w-[350px] h-[350px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(129, 81, 217, 0.35) 0%, rgba(106, 62, 196, 0.1) 50%, transparent 70%)',
-            filter: 'blur(50px)',
-          }}
-          animate={{ x: [0, -25, 0], y: [0, 20, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 0.7 }}
-          initial={{ top: '5%', left: '-5%' }}
-        />
-        <motion.div
-          className="absolute w-[500px] h-[500px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(245, 245, 220, 0.4) 0%, rgba(245, 245, 220, 0.1) 40%, transparent 70%)',
-            filter: 'blur(60px)',
-          }}
-          animate={{ x: [0, -40, 0], y: [0, 20, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-          initial={{ top: '20%', left: '-10%' }}
-        />
-        <motion.div
-          className="absolute w-[250px] h-[250px] rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(245, 245, 220, 0.35) 0%, rgba(245, 245, 220, 0.08) 50%, transparent 70%)',
-            filter: 'blur(50px)',
-          }}
-          animate={{ x: [0, -20, 0], y: [0, 15, 0], scale: [1, 1.05, 1] }}
-          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-          initial={{ top: '-5%', left: '5%' }}
-        />
       </div>
 
-      {/* RIGHT SIDE — Full height edge-to-edge */}
-      <motion.div
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-        className="hidden lg:block absolute top-0 bottom-0 right-0"
-        style={{ width: '45%', zIndex: 1 }}
-      >
-
-        {/* Fade mask — left edge */}
-        <div
-          className="absolute inset-y-0 left-0 z-10 pointer-events-none"
-          style={{
-            width: '220px',
-            background: 'linear-gradient(to right, var(--bg-page) 0%, transparent 100%)',
-          }}
-        />
-
-        {/* Fade mask — top edge */}
-        <div
-          className="absolute inset-x-0 top-0 z-10 pointer-events-none"
-          style={{
-            height: '140px',
-            background: 'linear-gradient(to bottom, var(--bg-page) 0%, transparent 100%)',
-          }}
-        />
-
-        {/* Fade mask — bottom edge */}
-        <div
-          className="absolute inset-x-0 bottom-0 z-10 pointer-events-none"
-          style={{
-            height: '140px',
-            background: 'linear-gradient(to top, var(--bg-page) 0%, transparent 100%)',
-          }}
-        />
-
-        {/* Purple glow */}
-        <div
-          className="absolute inset-0 pointer-events-none z-0"
-          style={{
-            background: 'radial-gradient(ellipse 60% 50% at 60% 50%, rgba(129,81,217,0.12) 0%, transparent 70%)',
-          }}
-        />
-
-        {/* Video */}
-        <video
-          src="/dashboard-preview.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover object-top"
-        />
-      </motion.div>
-
-      {/* LEFT SIDE — Text content */}
+      {/* MAIN CONTENT CONTAINER - Changed to a flex column with space-between */}
       <div
-        className="relative z-10 flex items-center"
-        style={{ minHeight: '100vh', paddingLeft: '16rem', paddingRight: '4rem' }}
+        className="relative z-10 flex flex-col justify-between"
+        style={{ minHeight: '100vh', padding: 'clamp(2rem, 6vw, 8rem)' }}
       >
+        
+        {/* TOP LEFT: HEADLINE */}
         <motion.div
-          className="w-full lg:w-[45%]"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
+          className="w-full lg:w-[60%]"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
         >
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="font-bold mb-6"
+            className="font-bold"
             style={{
-              fontSize: 'clamp(2.5rem, 5vw, 4.5rem)',
+              fontSize: 'clamp(2.5rem, 6vw, 5rem)',
               lineHeight: '1',
               letterSpacing: '-0.02em',
               color: 'var(--text-primary)',
             }}
           >
             Track Expenses,
-            <br></br>
+            <br />
             <span className="text-[var(--accent-primary)]">Build Better Habits</span>
           </motion.h1>
+        </motion.div>
 
+        {/* BOTTOM RIGHT: SUBTEXT AND BUTTON */}
+        <motion.div
+          className="w-full lg:w-[40%] self-end text-right flex flex-col items-end"
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
+        >
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="mb-8 max-w-lg"
+            className="mb-8"
             style={{
-              fontSize: 'clamp(1.125rem, 2.5vw, 1.25rem)',
+              fontSize: 'clamp(1rem, 2vw, 1.25rem)',
               lineHeight: '1.6',
               color: 'var(--text-secondary)',
+              maxWidth: '400px'
             }}
           >
             The simplest way to monitor your spending, manage budgets, and gain
             insights into your financial health. All in one beautiful app.
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 mb-8"
-          >
+          <motion.div className="flex justify-end w-full">
             <motion.a
               href="/login"
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-br from-[var(--accent-primary)] to-[var(--accent-strong)] text-white rounded-full font-semibold text-lg shadow-lg shadow-[var(--accent-glow)] min-w-[220px] justify-center"
@@ -186,18 +92,9 @@ const Hero: React.FC = () => {
               Start Tracking Today
               <ArrowRight size={20} />
             </motion.a>
-
-            <motion.a
-              href="#features"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-transparent border border-[#333333] text-[var(--text-primary)] rounded-full font-medium text-lg hover:bg-white/5 min-w-[220px] justify-center transition-colors"
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-            >
-              Learn More
-            </motion.a>
           </motion.div>
         </motion.div>
+
       </div>
     </section>
   );

@@ -279,17 +279,17 @@ const Profile = () => {
                         {/* Vertical divider */}
                         <div style={{ width: '1px', backgroundColor: 'rgba(128,128,128,0.12)' }} />
 
-                        {/* ── Right: Stats + Danger Zone ── */}
+                        {/* ── Right: Stats + Delete Account ── */}
                         <div className="w-60 flex-shrink-0 flex flex-col p-8 gap-4">
 
                             <h2 className="text-xs font-semibold uppercase tracking-widest theme-text-secondary">Account Stats</h2>
 
                             {[
-                                { icon: Calendar, label: 'Member Since', value: stats.memberSince, color: '#8151d9', bg: 'rgba(129,81,217,0.08)' },
-                                { icon: Activity, label: 'Transactions', value: stats.totalTransactions.toString(), color: '#10b981', bg: 'rgba(16,185,129,0.08)' },
-                                { icon: Flame,    label: 'Best Streak',  value: `${stats.longestNoSpendStreak} days`, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
+                                { icon: Calendar, label: 'Member Since', value: stats.memberSince, color: '#8151d9' },
+                                { icon: Activity, label: 'Transactions', value: stats.totalTransactions.toString(), color: '#10b981'},
+                                { icon: Flame,    label: 'Best Streak',  value: `${stats.longestNoSpendStreak} days`, color: '#f59e0b'},
                             ].map((stat) => (
-                                <div key={stat.label} className="flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: stat.bg }}>
+                                <div key={stat.label} className="flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: stat.color + '10' }}>
                                     <stat.icon className="w-4 h-4 flex-shrink-0" style={{ color: stat.color }} />
                                     <div>
                                         <p className="text-xs theme-text-secondary">{stat.label}</p>
@@ -301,19 +301,15 @@ const Profile = () => {
                             <div className="flex-1" />
                             <div style={{ height: '1px', backgroundColor: 'rgba(128,128,128,0.12)' }} />
 
-                            {/* Danger Zone */}
+                            {/* Delete Account */}
                             <div>
-                                <h2 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: '#ef4444' }}>
-                                    <Trash2 className="w-4 h-4" />
-                                    Danger Zone
-                                </h2>
                                 <p className="text-xs theme-text-secondary leading-relaxed mb-3">
                                     Permanently delete your account and all data. This cannot be undone.
                                 </p>
                                 <button
                                     onClick={() => setShowDeleteModal(true)}
                                     className="w-full py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90 cursor-pointer"
-                                    style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+                                    style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444'}}
                                 >
                                     Delete My Account
                                 </button>

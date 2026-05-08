@@ -92,7 +92,6 @@ const RenderLegend = ({ payload, totalSpent }: CustomLegendProps) => {
           <div key={`legend-${index}`} className="flex items-center gap-2">
             <div
               className="w-6 h-6 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: `${entry.color}30` }}
             >
               <IconComponent className="w-3.5 h-3.5" style={{ color: entry.color }} />
             </div>
