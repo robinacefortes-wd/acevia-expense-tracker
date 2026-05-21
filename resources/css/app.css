@@ -37,7 +37,7 @@ html {
 }
 
 :root {
-    /* Dashboard theme variables */
+    /* dashboard theme variables */
     --bg-primary: #0a0a0a;
     --bg-secondary: #141414;
     --text-primary: #ffffff;
@@ -48,7 +48,7 @@ html {
     --input-bg: rgba(255, 255, 255, 0.05);
     --input-border: rgba(255, 255, 255, 0.1);
 
-    /* App-wide variables (used by body, scrollbar, etc.) */
+    /* app-wide variables (used by body, scrollbar, etc.) */
     --background: #141414;
     --foreground: #ffffff;
     --card: #1a1a1a;

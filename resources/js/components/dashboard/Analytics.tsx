@@ -438,6 +438,38 @@ const Analytics = () => {
             </div>
           </motion.div>
 
+          {/* ── Income vs Expenses Trend Label ────────────────────────────── */}
+          <motion.div {...fadeUp(0.15)} className="mb-3">
+            <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: '#8151d9' }}>
+              Income vs Expenses Trend
+            </p>
+          </motion.div>
+
+          {/* ── Income vs Expenses Line Chart ──────────────────────────────── */}
+          <motion.div {...fadeUp(0.15)} className="card-glass rounded-2xl p-8 mb-6">
+            <div className="flex items-center gap-3 mb-6">
+              <h3 className="text-lg font-semibold theme-text">Income vs Expenses Trend</h3>
+              <span className="text-xs theme-text-secondary">over time</span>
+            </div>
+            {trendData.length === 0 ? (
+              <div className="flex items-center justify-center h-48 theme-text-secondary text-sm">
+                No data for this period
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={380}>
+                <LineChart data={trendData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="date" stroke="#6b7280" style={{ fontSize: '11px' }} />
+                  <YAxis stroke="#6b7280" style={{ fontSize: '11px' }} tickFormatter={(v: number) => `₱${(v/1000).toFixed(0)}k`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: '12px', color: '#9ca3af' }} />
+                  <Line type="monotone" dataKey="income" name="Income" stroke="#10b981" strokeWidth={2.5} dot={{ r: 3, fill: '#10b981' }} activeDot={{ r: 5 }} />
+                  <Line type="monotone" dataKey="expense" name="Expense" stroke="#ef4444" strokeWidth={2.5} dot={{ r: 3, fill: '#ef4444' }} activeDot={{ r: 5 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </motion.div>
+
           {/* ── Section 2: Behavioral Insights ─────────────────────────────── */}
           <motion.div {...fadeUp(0.2)} className="mb-3">
             <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: '#8151d9' }}>
