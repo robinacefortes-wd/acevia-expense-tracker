@@ -50,7 +50,7 @@ export default function Register() {
             <Head title="Register" />
 
             <div
-                className="min-h-screen flex items-center justify-center p-4"
+                className="min-h-screen flex items-center justify-center p-4 sm:p-6"
                 style={{ backgroundColor: '#0a0a0a' }}
             >
                 {/* Background glow */}
@@ -69,7 +69,7 @@ export default function Register() {
                 >
                     {/* Split Card */}
                     <div
-                        className="rounded-2xl overflow-hidden flex"
+                        className="rounded-2xl overflow-hidden flex flex-col lg:flex-row"
                         style={{
                             border: '1px solid rgba(255,255,255,0.07)',
                             boxShadow: '0 25px 60px rgba(0,0,0,0.5)',
@@ -78,24 +78,24 @@ export default function Register() {
                     >
                         {/* LEFT — Form Side */}
                         <div
-                            className="flex-1 p-10 flex flex-col justify-center"
+                            className="flex-1 p-6 sm:p-8 lg:p-10 flex flex-col justify-center"
                             style={{ backgroundColor: '#141414' }}
                         >
                             {/* Logo */}
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <img 
-                                        src="/acevia logo.png" 
-                                        alt="Acevia Logo" 
-                                        className="w-60 h-auto object-contain" 
+                            <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                                <div className="flex items-center gap-3 mb-0">
+                                    <img
+                                        src="/acevia logo.png"
+                                        alt="Acevia Logo"
+                                        className="w-40 sm:w-52 lg:w-60 h-auto object-contain"
                                     />
                                 </div>
                             </div>
 
-                            <h1 className="text-2xl font-bold mb-1" style={{ color: '#ffffff' }}>
+                            <h1 className="text-xl sm:text-2xl font-bold mb-1" style={{ color: '#ffffff' }}>
                                 Create your account
                             </h1>
-                            <p className="text-sm mb-6" style={{ color: '#6b7280' }}>
+                            <p className="text-sm mb-5 sm:mb-6" style={{ color: '#6b7280' }}>
                                 Start managing your finances today
                             </p>
 
@@ -108,7 +108,7 @@ export default function Register() {
                                 {({ processing, errors }) => (
                                     <>
                                         {/* First Name + Last Name */}
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                             <div className="flex flex-col gap-1.5">
                                                 <label htmlFor="first_name" className="text-sm font-medium" style={{ color: '#d1d5db' }}>
                                                     First name
@@ -311,9 +311,9 @@ export default function Register() {
                             </Form>
                         </div>
 
-                        {/* RIGHT — Purple Panel (w-72 same as Login) */}
+                        {/* RIGHT — Purple Panel (hidden on mobile, shown on lg+) */}
                         <div
-                            className="w-72 flex-shrink-0 flex flex-col items-center justify-center p-10 relative overflow-hidden"
+                            className="hidden lg:flex w-72 flex-shrink-0 flex-col items-center justify-center p-10 relative overflow-hidden"
                             style={{
                                 background: 'linear-gradient(160deg, #8151d9 0%, #6a3ec4 60%, #4f2d9e 100%)',
                             }}
@@ -325,7 +325,6 @@ export default function Register() {
 
                             {/* Content */}
                             <div className="relative z-10 text-center">
-                                
                                 <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>
                                     Join thousands managing their finances smarter.
                                 </p>
@@ -345,6 +344,34 @@ export default function Register() {
                                         </div>
                                     ))}
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* BOTTOM — Purple Banner (shown on mobile/tablet only, hidden on lg+) */}
+                        <div
+                            className="lg:hidden flex items-center justify-center gap-6 px-6 py-5 relative overflow-hidden"
+                            style={{
+                                background: 'linear-gradient(135deg, #8151d9 0%, #6a3ec4 60%, #4f2d9e 100%)',
+                            }}
+                        >
+                            {/* Decorative circles */}
+                            <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }} />
+                            <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }} />
+
+                            <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+                                {['Free to use', 'Secure & private', 'Real-time tracking'].map((item) => (
+                                    <div key={item} className="flex items-center gap-2">
+                                        <div
+                                            className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
+                                            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+                                        >
+                                            <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
+                                                <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        </div>
+                                        <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>{item}</span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>

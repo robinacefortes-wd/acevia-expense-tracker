@@ -40,7 +40,6 @@ const Profile = () => {
     });
     const [profileLoading, setProfileLoading] = useState(false);
 
-    // Cloudinary returns a full https:// URL — no /storage/ prefix needed
     const [avatarPreview, setAvatarPreview] = useState<string | null>(
         user.avatar || null
     );
@@ -100,7 +99,8 @@ const Profile = () => {
             <Head title="Profile" />
             <Sidebar />
 
-            <main className="flex-1 flex items-center justify-center relative overflow-hidden" style={{ marginLeft: '72px' }}>
+            {/* pl-[72px] on mobile clears the fixed sidebar; md+ uses margin */}
+            <main className="flex-1 relative overflow-hidden pl-[72px] md:pl-0 md:ml-[72px]">
 
                 {/* Background orbs */}
                 <div style={{
@@ -119,56 +119,59 @@ const Profile = () => {
                     filter: 'blur(60px)', top: '50%', right: '12%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 0,
                 }} />
 
-                <div className="w-full max-w-4xl px-8" style={{ position: 'relative', zIndex: 1 }}>
-
+                <div
+                    className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
+                >
                     <button
                         onClick={() => router.visit('/dashboard')}
                         className="flex items-center gap-2 theme-text-secondary hover:theme-text mb-4 transition-colors cursor-pointer"
                     >
-                        <ArrowLeft className="w-5 h-5" />
-                        <span>Back to Dashboard</span>
+                        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="text-sm sm:text-base">Back to Dashboard</span>
                     </button>
 
-                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 text-center">
-                        <h1 className="flex items-center gap-2 text-3xl font-bold theme-text">Profile</h1>
-                        <p className="flex items-center gap-2 theme-text-secondary text-sm mt-1">Manage your account information</p>
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-5 sm:mb-6">
+                        <h1 className="text-2xl sm:text-3xl font-bold theme-text">Profile</h1>
+                        <p className="theme-text-secondary text-xs sm:text-sm mt-1">Manage your account information</p>
                     </motion.div>
 
-                    {/* Card */}
+                    {/* Card — stacks vertically on mobile, side-by-side on lg+ */}
                     <motion.div
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.08 }}
-                        className="card-glass rounded-2xl flex overflow-hidden"
+                        className="card-glass rounded-2xl flex flex-col lg:flex-row overflow-hidden"
                     >
                         {/* ── Left: Avatar + Form ── */}
-                        <div className="flex-1 p-8 flex flex-col gap-6">
+                        <div className="flex-1 p-5 sm:p-8 flex flex-col gap-5 sm:gap-6">
 
                             {/* Avatar row */}
-                            <div className="flex items-center gap-5">
+                            <div className="flex items-center gap-4 sm:gap-5">
                                 <div className="relative flex-shrink-0">
                                     <div
-                                        className="w-24 h-24 rounded-full flex items-center justify-center overflow-hidden"
+                                        className="w-16 h-16 sm:w-24 sm:h-24 rounded-full flex items-center justify-center overflow-hidden"
                                         style={{ backgroundColor: avatarPreview ? 'transparent' : '#8151d9' }}
                                     >
                                         {avatarPreview
                                             ? <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
-                                            : <span className="text-white font-bold text-3xl">{initials || 'A'}</span>
+                                            : <span className="text-white font-bold text-2xl sm:text-3xl">{initials || 'A'}</span>
                                         }
                                     </div>
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
                                         disabled={avatarLoading}
-                                        className="absolute bottom-0 right-0 w-7 h-7 rounded-full flex items-center justify-center shadow cursor-pointer"
+                                        className="absolute bottom-0 right-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shadow cursor-pointer"
                                         style={{ background: 'linear-gradient(135deg, #8151d9, #a178e8)' }}
                                     >
-                                        <Camera className="w-3.5 h-3.5 text-white" />
+                                        <Camera className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
                                     </button>
                                     <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
                                 </div>
-                                <div>
-                                    <p className="font-bold theme-text text-lg">{user.first_name} {user.last_name}</p>
-                                    <p className="theme-text-secondary text-sm">{user.email}</p>
+                                <div className="min-w-0">
+                                    <p className="font-bold theme-text text-base sm:text-lg truncate">
+                                        {user.first_name} {user.last_name}
+                                    </p>
+                                    <p className="theme-text-secondary text-xs sm:text-sm truncate">{user.email}</p>
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
                                         className="text-xs mt-1 font-medium hover:opacity-80 cursor-pointer"
@@ -181,13 +184,13 @@ const Profile = () => {
 
                             <div style={{ height: '1px', backgroundColor: 'rgba(128,128,128,0.12)' }} />
 
-                            <h2 className="text-sm font-semibold theme-text flex items-center gap-2 -mb-3">
+                            <h2 className="text-sm font-semibold theme-text flex items-center gap-2 -mb-2">
                                 <User className="w-4 h-4" style={{ color: '#8151d9' }} />
                                 Personal Information
                             </h2>
 
-                            {/* First + Last */}
-                            <div className="grid grid-cols-2 gap-4">
+                            {/* First + Last — stacked on mobile, side by side on sm+ */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                                 <div className="flex flex-col gap-1.5">
                                     <label className="text-xs font-medium theme-text-secondary">First Name</label>
                                     <div className="relative">
@@ -250,7 +253,7 @@ const Profile = () => {
                                         onChange={handlePhoneChange}
                                         maxLength={10}
                                         placeholder="9XXXXXXXXX"
-                                        className="flex-1 px-3 py-2.5 text-sm focus:outline-none theme-text theme-input cursor-text"
+                                        className="flex-1 min-w-0 px-3 py-2.5 text-sm focus:outline-none theme-text theme-input cursor-text"
                                         onFocus={(e) => {
                                             e.currentTarget.parentElement!.style.borderColor = 'rgba(129,81,217,0.6)';
                                             e.currentTarget.parentElement!.style.boxShadow = '0 0 0 3px rgba(129,81,217,0.1)';
@@ -268,7 +271,7 @@ const Profile = () => {
                                 <button
                                     onClick={handleProfileSave}
                                     disabled={profileLoading}
-                                    className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer"
+                                    className="w-full sm:w-auto px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 cursor-pointer"
                                     style={{ background: 'linear-gradient(135deg, #8151d9 0%, #a178e8 100%)', opacity: profileLoading ? 0.7 : 1 }}
                                 >
                                     {profileLoading ? 'Saving...' : 'Save Changes'}
@@ -276,29 +279,33 @@ const Profile = () => {
                             </div>
                         </div>
 
-                        {/* Vertical divider */}
-                        <div style={{ width: '1px', backgroundColor: 'rgba(128,128,128,0.12)' }} />
+                        {/* Divider — horizontal on mobile, vertical on lg+ */}
+                        <div className="lg:hidden h-px w-full" style={{ backgroundColor: 'rgba(128,128,128,0.12)' }} />
+                        <div className="hidden lg:block w-px" style={{ backgroundColor: 'rgba(128,128,128,0.12)' }} />
 
                         {/* ── Right: Stats + Delete Account ── */}
-                        <div className="w-60 flex-shrink-0 flex flex-col p-8 gap-4">
+                        <div className="lg:w-60 lg:flex-shrink-0 flex flex-col p-5 sm:p-8 gap-4">
 
                             <h2 className="text-xs font-semibold uppercase tracking-widest theme-text-secondary">Account Stats</h2>
 
-                            {[
-                                { icon: Calendar, label: 'Member Since', value: stats.memberSince, color: '#8151d9' },
-                                { icon: Activity, label: 'Transactions', value: stats.totalTransactions.toString(), color: '#10b981'},
-                                { icon: Flame,    label: 'Best Streak',  value: `${stats.longestNoSpendStreak} days`, color: '#f59e0b'},
-                            ].map((stat) => (
-                                <div key={stat.label} className="flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: stat.color + '10' }}>
-                                    <stat.icon className="w-4 h-4 flex-shrink-0" style={{ color: stat.color }} />
-                                    <div>
-                                        <p className="text-xs theme-text-secondary">{stat.label}</p>
-                                        <p className="text-sm font-bold theme-text">{stat.value}</p>
+                            {/* Stats — row on mobile, column on lg+ */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-3">
+                                {[
+                                    { icon: Calendar, label: 'Member Since', value: stats.memberSince, color: '#8151d9' },
+                                    { icon: Activity, label: 'Transactions',  value: stats.totalTransactions.toString(), color: '#10b981' },
+                                    { icon: Flame,    label: 'Best Streak',   value: `${stats.longestNoSpendStreak} days`, color: '#f59e0b' },
+                                ].map((stat) => (
+                                    <div key={stat.label} className="flex items-center gap-3 p-3 rounded-xl" style={{ backgroundColor: stat.color + '10' }}>
+                                        <stat.icon className="w-4 h-4 flex-shrink-0" style={{ color: stat.color }} />
+                                        <div>
+                                            <p className="text-xs theme-text-secondary">{stat.label}</p>
+                                            <p className="text-sm font-bold theme-text">{stat.value}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
 
-                            <div className="flex-1" />
+                            <div className="hidden lg:block flex-1" />
                             <div style={{ height: '1px', backgroundColor: 'rgba(128,128,128,0.12)' }} />
 
                             {/* Delete Account */}
@@ -309,7 +316,7 @@ const Profile = () => {
                                 <button
                                     onClick={() => setShowDeleteModal(true)}
                                     className="w-full py-2 rounded-lg text-xs font-semibold transition-all hover:opacity-90 cursor-pointer"
-                                    style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444'}}
+                                    style={{ backgroundColor: 'rgba(239,68,68,0.08)', color: '#ef4444' }}
                                 >
                                     Delete My Account
                                 </button>
@@ -329,7 +336,7 @@ const Profile = () => {
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="w-full max-w-sm rounded-2xl p-6 card-glass"
+                        className="w-full max-w-sm rounded-2xl p-5 sm:p-6 card-glass"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: 'rgba(239,68,68,0.15)' }}>
